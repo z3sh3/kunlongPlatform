@@ -1,0 +1,38 @@
+# Caddy public entry point for new-api (automatic HTTPS).
+#
+# Mode is controlled by the DOMAIN env var (docker-compose.yml passes it from
+# .env, defaulting to ":80" when unset/empty):
+#   * DOMAIN=example.com  -> automatic Let's Encrypt HTTPS on :443; HTTP :80
+#                            redirects to HTTPS. Must be a domain NAME — a bare
+#                            IP address cannot get a publicly-trusted
+#                            certificate.
+#   * DOMAIN unset/empty  -> ":80": plain HTTP catch-all, for public-IP-only
+#                            access (no TLS).
+#
+# Caddy proxies everything to the new-api Go binary (which serves the embedded
+# web UI and the API on :3000). WebSockets (/v1/realtime) and SSE streaming
+# pass through natively; Caddy sets X-Forwarded-For/Proto for new-api's
+# TRUSTED_PROXIES handling.
+
+# Optional global options — uncomment and set your ACME account email to avoid
+# Let's Encrypt expiry notices:
+# {
+# 	email you@example.com
+# }
+
+{$DOMAIN} {
+	# Compress text responses (JS/CSS/JSON) at the edge.
+	encode zstd gzip
+
+	# Relay uploads (multipart/base64 image and audio payloads) can reach tens
+	# of MB; cap explicitly so a misconfigured client cannot exhaust memory.
+	request_body {
+		max_size 100MB
+	}
+
+	reverse_proxy newapi:3000 {
+		# Disable response buffering so SSE streaming completions reach the
+		# client immediately (the nginx setup needed proxy_buffering off).
+		flush_interval -1
+	}
+}
