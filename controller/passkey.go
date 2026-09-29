@@ -82,7 +82,8 @@ func PasskeyRegisterBegin(c *gin.Context) {
 	selection.UserVerification = protocol.VerificationRequired
 	options := []webauthnlib.RegistrationOption{webauthnlib.WithAuthenticatorSelection(selection)}
 	if credential != nil {
-		descriptor := credential.ToWebAuthnCredential().Descriptor()
+		existing := credential.ToWebAuthnCredential()
+		descriptor := existing.Descriptor()
 		options = append(options, webauthnlib.WithExclusions([]protocol.CredentialDescriptor{descriptor}))
 	}
 
