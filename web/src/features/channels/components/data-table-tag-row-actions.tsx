@@ -22,6 +22,7 @@ import { Power, PowerOff, Pencil, Edit } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { DataTableRowActionMenu } from '@/components/data-table/core/row-action-menu'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenuItem,
@@ -39,7 +40,7 @@ import type { Channel } from '../types'
 import { useChannels } from './channels-provider'
 
 interface DataTableTagRowActionsProps {
-  row: Row<Channel & { tag?: string }>
+  row: Row<DataTableFeatures, Channel & { tag?: string }>
 }
 
 export function DataTableTagRowActions({ row }: DataTableTagRowActionsProps) {

@@ -1,3 +1,7 @@
+import type { ReactTable } from '@tanstack/react-table'
+import { useTranslation } from 'react-i18next'
+
+import type { DataTableFeatures } from '@/components/data-table/features'
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -17,10 +21,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Combobox } from '@/components/ui/combobox'
-import type { Table } from '@tanstack/react-table'
-import { useTranslation } from 'react-i18next'
-
-
 
 import { CompactDateTimeRangePicker } from '../../components/compact-date-time-range-picker'
 import {
@@ -39,20 +39,20 @@ function AuditFilterSelect(props: {
   return (
     <LogsFilterField>
       <Combobox
-options={props.options}
-value={props.value}
-onValueChange={(value) => {
+        options={props.options}
+        value={props.value}
+        onValueChange={(value) => {
           if (value !== null) props.onChange(value)
         }}
-aria-label={props.label}
-className='w-full'
-/>
+        aria-label={props.label}
+        className='w-full'
+      />
     </LogsFilterField>
   )
 }
 
 export function AuditLogFilterBar(props: {
-  table: Table<AuditLog>
+  table: ReactTable<DataTableFeatures, AuditLog>
   filters: AuditFilters
   onChange: (patch: Partial<AuditFilters>) => void
   scope: 'all' | 'self'

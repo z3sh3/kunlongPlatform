@@ -17,13 +17,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import {
+  type RowData,
   flexRender,
   type Header,
-  type Table as TanstackTable,
+  type ReactTable as TanstackTable,
 } from '@tanstack/react-table'
 import type { KeyboardEvent, MouseEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 
@@ -31,15 +33,15 @@ import { DataTableColumnHeader } from './column-header'
 import { isContentSizedColumn } from './content-sized-columns'
 import type { DataTableColumnClassName } from './types'
 
-type DataTableHeaderProps<TData> = {
-  table: TanstackTable<TData>
+type DataTableHeaderProps<TData extends RowData> = {
+  table: TanstackTable<DataTableFeatures, TData>
   applyHeaderSize?: boolean
   className?: string
   rowClassName?: string
   getColumnClassName?: DataTableColumnClassName
 }
 
-export function DataTableHeader<TData>({
+export function DataTableHeader<TData extends RowData>({
   table,
   applyHeaderSize,
   className,
@@ -94,10 +96,10 @@ export function DataTableHeader<TData>({
   )
 }
 
-function handleColumnResizeKeyDown<TData>(
+function handleColumnResizeKeyDown<TData extends RowData>(
   event: KeyboardEvent<HTMLDivElement>,
-  table: TanstackTable<TData>,
-  header: Header<TData, unknown>
+  table: TanstackTable<DataTableFeatures, TData>,
+  header: Header<DataTableFeatures, TData, unknown>
 ) {
   const step = event.shiftKey ? 50 : 10
 
@@ -119,9 +121,9 @@ function handleColumnResizeKeyDown<TData>(
   }
 }
 
-function resizeColumnByKeyboard<TData>(
-  table: TanstackTable<TData>,
-  header: Header<TData, unknown>,
+function resizeColumnByKeyboard<TData extends RowData>(
+  table: TanstackTable<DataTableFeatures, TData>,
+  header: Header<DataTableFeatures, TData, unknown>,
   delta: number
 ) {
   table.setColumnSizing((previous) => ({
@@ -133,19 +135,19 @@ function resizeColumnByKeyboard<TData>(
   }))
 }
 
-function handleColumnAutoSize<TData>(
+function handleColumnAutoSize<TData extends RowData>(
   event: MouseEvent<HTMLDivElement>,
-  table: TanstackTable<TData>,
-  header: Header<TData, unknown>
+  table: TanstackTable<DataTableFeatures, TData>,
+  header: Header<DataTableFeatures, TData, unknown>
 ) {
   event.preventDefault()
   autoSizeColumn(event.currentTarget, table, header)
 }
 
-function autoSizeColumn<TData>(
+function autoSizeColumn<TData extends RowData>(
   resizerElement: HTMLElement,
-  table: TanstackTable<TData>,
-  header: Header<TData, unknown>
+  table: TanstackTable<DataTableFeatures, TData>,
+  header: Header<DataTableFeatures, TData, unknown>
 ) {
   const measuredSize = measureColumnContentWidth(
     resizerElement,
@@ -162,8 +164,8 @@ function autoSizeColumn<TData>(
   }))
 }
 
-function getClampedColumnSize<TData>(
-  header: Header<TData, unknown>,
+function getClampedColumnSize<TData extends RowData>(
+  header: Header<DataTableFeatures, TData, unknown>,
   nextSize: number
 ) {
   const { minSize, maxSize } = header.column.columnDef
@@ -237,9 +239,9 @@ function getColumnElementSelector(columnId: string) {
   return `[data-column-id="${escapedColumnId}"]`
 }
 
-function shouldRenderColumnResizer<TData>(
-  table: TanstackTable<TData>,
-  header: Header<TData, unknown>
+function shouldRenderColumnResizer<TData extends RowData>(
+  table: TanstackTable<DataTableFeatures, TData>,
+  header: Header<DataTableFeatures, TData, unknown>
 ) {
   return (
     table.options.enableColumnResizing === true &&
@@ -249,8 +251,8 @@ function shouldRenderColumnResizer<TData>(
   )
 }
 
-function getHeaderSizeStyle<TData>(
-  header: Header<TData, unknown>,
+function getHeaderSizeStyle<TData extends RowData>(
+  header: Header<DataTableFeatures, TData, unknown>,
   applyHeaderSize: boolean | undefined
 ) {
   if (!applyHeaderSize || isContentSizedColumn(header.column.id)) {
@@ -260,7 +262,9 @@ function getHeaderSizeStyle<TData>(
   return { width: header.getSize() }
 }
 
-function renderHeaderContent<TData>(header: Header<TData, unknown>) {
+function renderHeaderContent<TData extends RowData>(
+  header: Header<DataTableFeatures, TData, unknown>
+) {
   if (header.isPlaceholder) return null
   const { header: headerDef, meta } = header.column.columnDef
   // A string header means the user wrote e.g. `header: t('Name')` — auto-render

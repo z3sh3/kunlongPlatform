@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useMutation } from '@tanstack/react-query'
-import type { Table } from '@tanstack/react-table'
+import type { ReactTable } from '@tanstack/react-table'
 import { Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -26,6 +26,7 @@ import { toast } from 'sonner'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { CopyButton } from '@/components/copy-button'
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Button } from '@/components/ui/button'
 import {
   Tooltip,
@@ -40,7 +41,7 @@ import type { Redemption } from '../types'
 import { useRedemptions } from './redemptions-provider'
 
 type DataTableBulkActionsProps = {
-  table: Table<Redemption>
+  table: ReactTable<DataTableFeatures, Redemption>
 }
 
 export function DataTableBulkActions(props: DataTableBulkActionsProps) {

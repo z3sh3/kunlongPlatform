@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import type { Row, Table } from '@tanstack/react-table'
+import type { Row, RowData, ReactTable } from '@tanstack/react-table'
 import { Database } from 'lucide-react'
 /*
 Copyright (C) 2023-2026 QuantumNous
@@ -39,6 +39,7 @@ For commercial licensing, please contact support@quantumnous.com
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { DataTableFeatures } from '@/components/data-table/features'
 import {
   Empty,
   EmptyDescription,
@@ -65,20 +66,20 @@ export type DataTableCardHelpers = {
   isSelected: boolean
 }
 
-export interface DataTableCardGridProps<TData> {
-  table: Table<TData>
+export interface DataTableCardGridProps<TData extends RowData> {
+  table: ReactTable<DataTableFeatures, TData>
   isLoading?: boolean
   emptyTitle?: string
   emptyDescription?: string
   emptyIcon?: React.ReactNode
-  getRowKey?: (row: Row<TData>) => string | number
-  getRowClassName?: (row: Row<TData>) => string | undefined
+  getRowKey?: (row: Row<DataTableFeatures, TData>) => string | number
+  getRowClassName?: (row: Row<DataTableFeatures, TData>) => string | undefined
   /**
    * Custom card renderer. When omitted, cards render generically from the
    * column definitions via {@link CardRowContent} (driven by column meta).
    */
   renderCard?: (
-    row: Row<TData>,
+    row: Row<DataTableFeatures, TData>,
     helpers: DataTableCardHelpers
   ) => React.ReactNode
   /**
@@ -133,7 +134,9 @@ function CardGridSkeleton(props: {
  * The default generic card omits the `select` column. Custom `renderCard`
  * implementations can use `helpers.isSelected` to keep selection UI in sync.
  */
-export function DataTableCardGrid<TData>(props: DataTableCardGridProps<TData>) {
+export function DataTableCardGrid<TData extends RowData>(
+  props: DataTableCardGridProps<TData>
+) {
   const { t } = useTranslation()
 
   const resolvedEmptyTitle = props.emptyTitle ?? t('No Data')

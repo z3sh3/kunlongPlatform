@@ -27,6 +27,7 @@ import {
   DataTableBulkActions,
   useDataTable,
 } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { ErrorState } from '@/components/error-state'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -70,7 +71,7 @@ export function VendorLinkedModels({
     },
   })
   const rules = getNameRuleConfig(t)
-  const columns: ColumnDef<Model>[] = [
+  const columns: ColumnDef<DataTableFeatures, Model>[] = [
     {
       id: 'select',
       enableSorting: false,
@@ -79,7 +80,10 @@ export function VendorLinkedModels({
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected()}
-          indeterminate={table.getIsSomePageRowsSelected()}
+          indeterminate={
+            table.getIsSomePageRowsSelected() &&
+            !table.getIsAllPageRowsSelected()
+          }
           onCheckedChange={(checked) =>
             table.toggleAllPageRowsSelected(Boolean(checked))
           }

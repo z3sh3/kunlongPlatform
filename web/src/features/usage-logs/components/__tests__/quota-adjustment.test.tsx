@@ -17,11 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from '@tanstack/react-table'
+import { useTable, flexRender } from '@tanstack/react-table'
 import { act, render, screen, within } from '@testing-library/react'
 import { createInstance } from 'i18next'
 import { I18nextProvider } from 'react-i18next'
@@ -35,6 +31,7 @@ import {
   vi,
 } from 'vitest'
 
+import { dataTableFeatures } from '@/components/data-table/features'
 import en from '@/i18n/locales/en.json'
 import zh from '@/i18n/locales/zh.json'
 import {
@@ -63,10 +60,10 @@ vi.hoisted(() => {
 afterAll(() => vi.unstubAllGlobals())
 
 function QuotaLogPreview(props: { log: UsageLog }) {
-  const table = useReactTable({
+  const table = useTable({
+    features: dataTableFeatures,
     data: [props.log],
     columns: useCommonLogsColumns(false, false),
-    getCoreRowModel: getCoreRowModel(),
   })
   const cell = table
     .getRowModel()

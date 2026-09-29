@@ -20,6 +20,7 @@ import { flexRender, type Row } from '@tanstack/react-table'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { GroupBadge } from '@/components/group-badge'
 import { StatusBadgeTypeContext } from '@/components/status-badge'
 
@@ -43,7 +44,7 @@ function ChannelCardComponent({
   row,
   isSelected,
 }: {
-  row: Row<Channel>
+  row: Row<DataTableFeatures, Channel>
   isSelected: boolean
 }) {
   const { t } = useTranslation()

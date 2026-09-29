@@ -16,12 +16,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import type { ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef, RowData } from '@tanstack/react-table'
 import { Zap } from 'lucide-react'
 /* eslint-disable react-refresh/only-export-components */
 import { useState } from 'react'
 
 import { DataTableColumnHeader } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { StatusBadge } from '@/components/status-badge'
 import {
   Tooltip,
@@ -72,11 +73,11 @@ export function CacheTooltip({
 /**
  * Create a timestamp column - compact mono style matching common logs
  */
-export function createTimestampColumn<T>(config: {
+export function createTimestampColumn<T extends RowData>(config: {
   accessorKey: string
   title: string
   unit?: 'seconds' | 'milliseconds'
-}): ColumnDef<T> {
+}): ColumnDef<DataTableFeatures, T> {
   const { accessorKey, title, unit = 'milliseconds' } = config
 
   return {
@@ -102,13 +103,13 @@ export function createTimestampColumn<T>(config: {
 /**
  * Create a duration column - pill style matching common logs timing
  */
-export function createDurationColumn<T>(config: {
+export function createDurationColumn<T extends RowData>(config: {
   submitTimeKey: string
   finishTimeKey: string
   unit?: 'seconds' | 'milliseconds'
   headerLabel: string
   warningThresholdSec?: number
-}): ColumnDef<T> {
+}): ColumnDef<DataTableFeatures, T> {
   const {
     submitTimeKey,
     finishTimeKey,
@@ -163,10 +164,10 @@ export function createDurationColumn<T>(config: {
 /**
  * Create a channel column (admin only) - #id badge matching common logs
  */
-export function createChannelColumn<T>(config: {
+export function createChannelColumn<T extends RowData>(config: {
   accessorKey?: string
   headerLabel: string
-}): ColumnDef<T> {
+}): ColumnDef<DataTableFeatures, T> {
   const { accessorKey = 'channel_id', headerLabel } = config
 
   return {
@@ -197,11 +198,11 @@ export function createChannelColumn<T>(config: {
 /**
  * Create a fail reason column - text-xs truncate, hover underline, dialog
  */
-export function createFailReasonColumn<T>(config: {
+export function createFailReasonColumn<T extends RowData>(config: {
   accessorKey?: string
   headerLabel: string
   cellTitle: string
-}): ColumnDef<T> {
+}): ColumnDef<DataTableFeatures, T> {
   const { accessorKey = 'fail_reason', headerLabel, cellTitle } = config
 
   return {
@@ -244,10 +245,10 @@ export function createFailReasonColumn<T>(config: {
 /**
  * Create a progress column - compact mono pill
  */
-export function createProgressColumn<T>(config: {
+export function createProgressColumn<T extends RowData>(config: {
   accessorKey?: string
   headerLabel: string
-}): ColumnDef<T> {
+}): ColumnDef<DataTableFeatures, T> {
   const { accessorKey = 'progress', headerLabel } = config
 
   return {

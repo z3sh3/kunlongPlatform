@@ -21,6 +21,8 @@ For commercial licensing, please contact support@quantumnous.com
  */
 import type { ColumnDef } from '@tanstack/react-table'
 
+import type { DataTableFeatures } from '@/components/data-table/features'
+
 import { useCommonLogsColumns } from '../components/columns/common-logs-columns'
 import { useDrawingLogsColumns } from '../components/columns/drawing-logs-columns'
 import { useTaskLogsColumns } from '../components/columns/task-logs-columns'
@@ -36,7 +38,7 @@ export function useColumnsByCategory(
   isRoot: boolean,
   showBillingSource = false
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): ColumnDef<any>[] {
+): ColumnDef<DataTableFeatures, any>[] {
   const commonColumns = useCommonLogsColumns(isAdmin, isRoot, showBillingSource)
   const drawingColumns = useDrawingLogsColumns(isAdmin)
   const taskColumns = useTaskLogsColumns(isAdmin, isRoot)

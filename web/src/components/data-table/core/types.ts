@@ -16,8 +16,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import type { Row, Table as TanstackTable } from '@tanstack/react-table'
+import type {
+  RowData,
+  Row,
+  ReactTable as TanstackTable,
+} from '@tanstack/react-table'
 import type * as React from 'react'
+
+import type { DataTableFeatures } from '@/components/data-table/features'
 
 export type DataTableColumnClassName = (
   columnId: string,
@@ -36,10 +42,10 @@ export type DataTableRenderRowHelpers = {
   getCellClassName: (columnId: string, className?: string) => string | undefined
 }
 
-export type DataTableViewProps<TData> = {
-  table: TanstackTable<TData>
+export type DataTableViewProps<TData extends RowData> = {
+  table: TanstackTable<DataTableFeatures, TData>
   isLoading?: boolean
-  rows?: Row<TData>[]
+  rows?: Row<DataTableFeatures, TData>[]
   emptyTitle?: string
   emptyDescription?: string
   emptyIcon?: React.ReactNode
@@ -49,10 +55,10 @@ export type DataTableViewProps<TData> = {
   skeletonKeyPrefix?: string
   skeletonRowHeight?: string
   renderRow?: (
-    row: Row<TData>,
+    row: Row<DataTableFeatures, TData>,
     helpers: DataTableRenderRowHelpers
   ) => React.ReactNode
-  getRowClassName?: (row: Row<TData>) => string | undefined
+  getRowClassName?: (row: Row<DataTableFeatures, TData>) => string | undefined
   getColumnClassName?: DataTableColumnClassName
   pinnedColumns?: DataTablePinnedColumn[]
   applyHeaderSize?: boolean

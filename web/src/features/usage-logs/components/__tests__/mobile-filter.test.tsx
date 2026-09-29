@@ -24,7 +24,7 @@ import {
   createRouter,
   RouterProvider,
 } from '@tanstack/react-router'
-import { getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { useTable } from '@tanstack/react-table'
 import {
   render,
   screen,
@@ -37,6 +37,7 @@ import userEvent from '@testing-library/user-event'
 import i18next from 'i18next'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 
+import { dataTableFeatures } from '@/components/data-table/features'
 import zhTW from '@/i18n/locales/zh-TW.json'
 import zh from '@/i18n/locales/zh.json'
 import { api } from '@/lib/api'
@@ -59,10 +60,10 @@ beforeEach(() => {
 })
 
 function Fixture() {
-  const table = useReactTable({
+  const table = useTable({
+    features: dataTableFeatures,
     data: [],
     columns: [],
-    getCoreRowModel: getCoreRowModel(),
   })
   return (
     <UsageLogsProvider>
@@ -187,10 +188,10 @@ it('keeps all quick actions visible without opening a menu', async () => {
 })
 
 function LoadingFixture(props: { loading: boolean; onSearch: () => void }) {
-  const table = useReactTable({
+  const table = useTable({
+    features: dataTableFeatures,
     data: [],
     columns: [],
-    getCoreRowModel: getCoreRowModel(),
   })
   return (
     <LogsFilterToolbar

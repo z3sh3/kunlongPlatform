@@ -28,6 +28,7 @@ import {
   DataTableBulkActions,
   useDataTable,
 } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { ErrorState } from '@/components/error-state'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -90,7 +91,7 @@ export function VendorsTable() {
       return response.data
     },
   })
-  const columns: ColumnDef<Vendor>[] = [
+  const columns: ColumnDef<DataTableFeatures, Vendor>[] = [
     {
       id: 'select',
       enableHiding: false,
@@ -99,7 +100,10 @@ export function VendorsTable() {
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected()}
-          indeterminate={table.getIsSomePageRowsSelected()}
+          indeterminate={
+            table.getIsSomePageRowsSelected() &&
+            !table.getIsAllPageRowsSelected()
+          }
           onCheckedChange={(checked) =>
             table.toggleAllPageRowsSelected(Boolean(checked))
           }

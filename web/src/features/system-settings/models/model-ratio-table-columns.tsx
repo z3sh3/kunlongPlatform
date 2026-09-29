@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import type { ColumnDef } from '@tanstack/react-table'
 
 import { DataTableColumnHeader } from '@/components/data-table/core/column-header'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { StaticRowActions } from '@/components/data-table/static/static-row-actions'
 import { StatusBadge } from '@/components/status-badge'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -55,14 +56,17 @@ export function buildModelRatioColumns({
   deleteDisabled,
   taskModelNames,
   t,
-}: BuildModelRatioColumnsOptions): ColumnDef<ModelRow>[] {
+}: BuildModelRatioColumnsOptions): ColumnDef<DataTableFeatures, ModelRow>[] {
   return [
     {
       id: 'select',
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected()}
-          indeterminate={table.getIsSomePageRowsSelected()}
+          indeterminate={
+            table.getIsSomePageRowsSelected() &&
+            !table.getIsAllPageRowsSelected()
+          }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label={t('Select all')}
           className='translate-y-[2px]'
@@ -93,7 +97,8 @@ export function buildModelRatioColumns({
         const showTaskPricingBadge = isTaskModel && hasConfiguredTaskPricing
         const showTieredBadge =
           row.original.billingMode === 'tiered_expr' && !isTaskModel
-        const showUnconfiguredTaskBadge = isTaskModel && !hasConfiguredTaskPricing
+        const showUnconfiguredTaskBadge =
+          isTaskModel && !hasConfiguredTaskPricing
 
         return (
           <div className='flex min-w-0 items-center gap-2 font-medium'>
@@ -151,7 +156,10 @@ export function buildModelRatioColumns({
       ),
       filterFn: (row, id, value) => {
         if (filterBySelectedValues(row.getValue(id), value)) return true
-        if (!Array.isArray(value) || !value.includes(TASK_PRICING_MODE_FILTER)) {
+        if (
+          !Array.isArray(value) ||
+          !value.includes(TASK_PRICING_MODE_FILTER)
+        ) {
           return false
         }
         return (
@@ -177,7 +185,7 @@ export function buildModelRatioColumns({
           </span>
         </div>
       ),
-      sortingFn: (rowA, rowB) =>
+      sortFn: (rowA, rowB) =>
         getPriceSummary(rowA.original, t).localeCompare(
           getPriceSummary(rowB.original, t)
         ),

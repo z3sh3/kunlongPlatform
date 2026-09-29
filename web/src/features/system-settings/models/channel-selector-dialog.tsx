@@ -26,6 +26,7 @@ import {
   DataTableView,
   useDataTable,
 } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Dialog } from '@/components/dialog'
 import { StatusBadge } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
@@ -118,7 +119,7 @@ export function ChannelSelectorDialog({
     return option ? endpoint : 'custom'
   }
 
-  const columns = useMemo<ColumnDef<UpstreamChannel>[]>(
+  const columns = useMemo<ColumnDef<DataTableFeatures, UpstreamChannel>[]>(
     () => [
       {
         id: 'select',
@@ -127,7 +128,10 @@ export function ChannelSelectorDialog({
         header: ({ table }) => (
           <Checkbox
             checked={table.getIsAllPageRowsSelected()}
-            indeterminate={table.getIsSomePageRowsSelected()}
+            indeterminate={
+              table.getIsSomePageRowsSelected() &&
+              !table.getIsAllPageRowsSelected()
+            }
             onCheckedChange={(value) =>
               table.toggleAllPageRowsSelected(!!value)
             }

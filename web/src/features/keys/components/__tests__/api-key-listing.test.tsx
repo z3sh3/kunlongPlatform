@@ -24,11 +24,7 @@ import {
   createRouter,
   RouterProvider,
 } from '@tanstack/react-router'
-import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from '@tanstack/react-table'
+import { useTable, flexRender } from '@tanstack/react-table'
 import {
   act,
   cleanup,
@@ -43,6 +39,7 @@ import { I18nextProvider } from 'react-i18next'
 import { Toaster, toast } from 'sonner'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 
+import { dataTableFeatures } from '@/components/data-table/features'
 import zh from '@/i18n/locales/zh.json'
 import { api } from '@/lib/api'
 import {
@@ -83,10 +80,10 @@ function QuotaTable(props: { apiKey: ApiKey }) {
   const columns = useApiKeysColumns(now).filter(
     (column) => column.id === 'quota'
   )
-  const table = useReactTable({
+  const table = useTable({
+    features: dataTableFeatures,
     columns,
     data: [props.apiKey],
-    getCoreRowModel: getCoreRowModel(),
   })
   return (
     <table>

@@ -20,7 +20,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import type {
   ColumnDef,
   RowSelectionState,
-  Table as TanStackTable,
+  ReactTable as TanStackTable,
 } from '@tanstack/react-table'
 import {
   Check,
@@ -50,6 +50,7 @@ import {
   DataTableView,
   useDataTable,
 } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Dialog } from '@/components/dialog'
 import {
   sideDrawerContentClassName,
@@ -822,7 +823,7 @@ function ChannelTestDialogContent({
     ? t('Test {{count}} matching models', { count: filteredModels.length })
     : t('Test all {{count}} models', { count: filteredModels.length })
 
-  const columns = useMemo<ColumnDef<ModelRow>[]>(
+  const columns = useMemo<ColumnDef<DataTableFeatures, ModelRow>[]>(
     () => [
       {
         id: 'select',
@@ -1255,8 +1256,12 @@ function FailureResultContent({
             variant='outline'
             size='sm'
             className='h-7 w-fit px-2 text-xs'
-            onClick={() =>
-              window.open('/system-settings/billing/model-pricing', '_blank')
+            render={
+              <a
+                href='/system-settings/billing/model-pricing'
+                target='_blank'
+                rel='noopener noreferrer'
+              />
             }
           >
             <Settings className='mr-1 h-3 w-3 shrink-0' />
@@ -1354,7 +1359,11 @@ function FailureDetailsSheet({
   )
 }
 
-function TestModelsBulkActions({ table }: { table: TanStackTable<ModelRow> }) {
+function TestModelsBulkActions({
+  table,
+}: {
+  table: TanStackTable<DataTableFeatures, ModelRow>
+}) {
   const { t } = useTranslation()
   const { copyToClipboard } = useCopyToClipboard()
   const selectedRows = table.getFilteredSelectedRowModel().rows

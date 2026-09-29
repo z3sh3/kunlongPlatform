@@ -27,6 +27,7 @@ import {
   DataTableRow,
   useDataTable,
 } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import {
   getAdminPlans,
   getSelfSubscriptionFull,
@@ -209,7 +210,7 @@ export function UsageLogsTable({ logCategory }: UsageLogsTableProps) {
 
   const { table } = useDataTable({
     data: logs as Record<string, unknown>[],
-    columns: columns as ColumnDef<Record<string, unknown>>[],
+    columns: columns as ColumnDef<DataTableFeatures, Record<string, unknown>>[],
     columnFilters,
     columnVisibilityStorageKey: getColumnVisibilityStorageKey(
       logCategory,
@@ -231,7 +232,9 @@ export function UsageLogsTable({ logCategory }: UsageLogsTableProps) {
     <DataTablePage
       table={table}
       compactPagination={isMobile && isCommon}
-      columns={columns as ColumnDef<Record<string, unknown>>[]}
+      columns={
+        columns as ColumnDef<DataTableFeatures, Record<string, unknown>>[]
+      }
       isLoading={isLoadingData}
       isFetching={isFetching}
       emptyTitle={t('No Logs Found')}

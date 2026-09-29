@@ -16,11 +16,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { type Column } from '@tanstack/react-table'
+import type { Column, RowData } from '@tanstack/react-table'
 import { Check as CheckIcon, PlusCircle as PlusCircledIcon } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -40,8 +41,8 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 
-type DataTableFacetedFilterProps<TData, TValue> = {
-  column?: Column<TData, TValue>
+type DataTableFacetedFilterProps<TData extends RowData, TValue> = {
+  column?: Column<DataTableFeatures, TData, TValue>
   title?: string
   options: {
     label: string
@@ -54,7 +55,7 @@ type DataTableFacetedFilterProps<TData, TValue> = {
   singleSelect?: boolean
 }
 
-function DataTableFacetedFilterInner<TData, TValue>({
+function DataTableFacetedFilterInner<TData extends RowData, TValue>({
   column,
   title,
   options,

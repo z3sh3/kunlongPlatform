@@ -35,6 +35,7 @@ import {
   useDebouncedColumnFilter,
   useDataTable,
 } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -329,7 +330,8 @@ export function ChannelsTable() {
     pagination,
     globalFilter,
     enableRowSelection: batchMode
-      ? (row: Row<Channel>) => !isTagAggregateRow(row.original)
+      ? (row: Row<DataTableFeatures, Channel>) =>
+          !isTagAggregateRow(row.original)
       : false,
     onSortingChange: handleSortingChange,
     onColumnFiltersChange: handleColumnFiltersChange,

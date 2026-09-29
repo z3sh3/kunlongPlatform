@@ -16,11 +16,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import type { Table } from '@tanstack/react-table'
+import type { RowData, ReactTable } from '@tanstack/react-table'
 import { X } from 'lucide-react'
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -31,8 +32,8 @@ import {
 } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
-type DataTableBulkActionsProps<TData> = {
-  table: Table<TData>
+type DataTableBulkActionsProps<TData extends RowData> = {
+  table: ReactTable<DataTableFeatures, TData>
   placement?: 'floating' | 'inline'
   entityName: string
   children: React.ReactNode
@@ -43,12 +44,12 @@ type DataTableBulkActionsProps<TData> = {
  *
  * @template TData The type of data in the table.
  * @param {object} props The component props.
- * @param {Table<TData>} props.table The react-table instance.
+ * @param {ReactTable<DataTableFeatures, TData>} props.table The react-table instance.
  * @param {string} props.entityName The name of the entity being acted upon (e.g., "task", "user").
  * @param {React.ReactNode} props.children The action buttons to be rendered inside the toolbar.
  * @returns {React.ReactNode | null} The rendered component or null if no rows are selected.
  */
-export function DataTableBulkActions<TData>({
+export function DataTableBulkActions<TData extends RowData>({
   table,
   entityName,
   placement = 'floating',

@@ -21,6 +21,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { TruncatedCell } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { StatusBadge } from '@/components/status-badge'
 import dayjs from '@/lib/dayjs'
 
@@ -30,10 +31,10 @@ import { AuditLogDetailsDialog } from './audit-log-details-dialog'
 
 export function useAuditLogColumns(
   accessOnly?: boolean
-): ColumnDef<AuditLog>[] {
+): ColumnDef<DataTableFeatures, AuditLog>[] {
   const { t } = useTranslation()
   return useMemo(() => {
-    const columns: ColumnDef<AuditLog>[] = [
+    const columns: ColumnDef<DataTableFeatures, AuditLog>[] = [
       {
         accessorKey: 'created_at',
         header: t('Time'),

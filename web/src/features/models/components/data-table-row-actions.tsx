@@ -23,6 +23,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { DataTableRowActionMenu } from '@/components/data-table/core/row-action-menu'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenuItem,
@@ -36,7 +37,7 @@ import { ModelDeleteDialog } from './dialogs/model-delete-dialog'
 import { useModels } from './models-provider'
 
 interface DataTableRowActionsProps {
-  row: Row<Model>
+  row: Row<DataTableFeatures, Model>
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {

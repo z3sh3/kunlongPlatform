@@ -38,6 +38,7 @@ import {
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { StatusBadge } from '@/components/status-badge'
 import { formatTimestampToDate } from '@/lib/format'
 
@@ -83,10 +84,10 @@ function getDrawingTypeIcon(action: string): LucideIcon {
 
 export function useDrawingLogsColumns(
   isAdmin: boolean
-): ColumnDef<MidjourneyLog>[] {
+): ColumnDef<DataTableFeatures, MidjourneyLog>[] {
   const { t } = useTranslation()
   return useMemo(() => {
-    const columns: ColumnDef<MidjourneyLog>[] = [
+    const columns: ColumnDef<DataTableFeatures, MidjourneyLog>[] = [
       {
         accessorKey: 'submit_time',
         header: t('Submit Time'),

@@ -24,7 +24,7 @@ import {
   createRouter,
   RouterProvider,
 } from '@tanstack/react-router'
-import { getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { useTable } from '@tanstack/react-table'
 import {
   cleanup,
   render,
@@ -35,16 +35,17 @@ import {
 import userEvent from '@testing-library/user-event'
 import { afterEach, expect, it, vi } from 'vitest'
 
+import { dataTableFeatures } from '@/components/data-table/features'
 import { api } from '@/lib/api'
 
 import { CommonLogsFilterBar } from '../common-logs-filter-bar'
 import { UsageLogsProvider } from '../usage-logs-provider'
 
 function FilterFixture() {
-  const table = useReactTable({
+  const table = useTable({
+    features: dataTableFeatures,
     data: [],
     columns: [],
-    getCoreRowModel: getCoreRowModel(),
   })
   return (
     <UsageLogsProvider>

@@ -16,14 +16,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import type { Table as TanstackTable } from '@tanstack/react-table'
+import type {
+  RowData,
+  ReactTable as TanstackTable,
+} from '@tanstack/react-table'
+
+import type { DataTableFeatures } from '@/components/data-table/features'
 
 import { isContentSizedColumn } from './content-sized-columns'
 
-export function DataTableColgroup<TData>({
+export function DataTableColgroup<TData extends RowData>({
   table,
 }: {
-  table: TanstackTable<TData>
+  table: TanstackTable<DataTableFeatures, TData>
 }) {
   const columns = table.getVisibleLeafColumns()
   const sizedColumns = columns.filter(
@@ -47,8 +52,8 @@ export function DataTableColgroup<TData>({
   )
 }
 
-function getColumnWidth<TData>(
-  table: TanstackTable<TData>,
+function getColumnWidth<TData extends RowData>(
+  table: TanstackTable<DataTableFeatures, TData>,
   columnId: string,
   columnSize: number,
   totalSize: number

@@ -26,6 +26,7 @@ import {
   DataTableView,
   useDataTable,
 } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 
 import { DEFAULT_PRICING_PAGE_SIZE, DEFAULT_TOKEN_UNIT } from '../constants'
 import type { PricingModel, TokenUnit } from '../types'
@@ -99,7 +100,7 @@ export function PricingTable(props: PricingTableProps) {
         getColumnClassName={(_columnId, kind) =>
           kind === 'header' ? 'text-muted-foreground font-medium' : undefined
         }
-        renderRow={(row: Row<PricingModel>) => (
+        renderRow={(row: Row<DataTableFeatures, PricingModel>) => (
           <DataTableRow
             key={row.id}
             row={row}

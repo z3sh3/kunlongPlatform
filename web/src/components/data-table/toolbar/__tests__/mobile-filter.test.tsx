@@ -16,16 +16,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import {
-  getCoreRowModel,
-  useReactTable,
-  type ColumnFiltersState,
-} from '@tanstack/react-table'
+import { useTable, type ColumnFiltersState } from '@tanstack/react-table'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { afterEach, expect, it, vi } from 'vitest'
 
+import { dataTableFeatures } from '@/components/data-table/features'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -44,14 +41,15 @@ function Fixture(props: { collapsibleOnMobile?: boolean }) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([
     { id: 'status', value: ['enabled'] },
   ])
-  const table = useReactTable({
+  const table = useTable({
+    features: dataTableFeatures,
     data: rows,
     columns: [
       { accessorKey: 'name' },
       { accessorKey: 'model' },
       { accessorKey: 'status' },
     ],
-    getCoreRowModel: getCoreRowModel(),
+
     state: { columnFilters },
     onColumnFiltersChange: setColumnFilters,
   })

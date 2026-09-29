@@ -33,6 +33,7 @@ import { toast } from 'sonner'
 
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { BadgeListCell } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { GroupBadge } from '@/components/group-badge'
 import { ProviderBadge } from '@/components/provider-badge'
 import { StatusBadge, type StatusBadgeProps } from '@/components/status-badge'
@@ -619,7 +620,7 @@ export function useChannelsColumns(
   options: {
     enableSelection?: boolean
   } = {}
-): ColumnDef<Channel>[] {
+): ColumnDef<DataTableFeatures, Channel>[] {
   const { t, i18n } = useTranslation()
   const { sensitiveVisible } = useChannels()
   const enableSelection = options.enableSelection ?? true
@@ -628,7 +629,7 @@ export function useChannelsColumns(
   // locale, and sensitive-data visibility. Memoizing keeps the array (and every
   // cell renderer reference) stable across unrelated re-renders, so react-table
   // does not invalidate the whole row model on each parent render.
-  return useMemo<ColumnDef<Channel>[]>(
+  return useMemo<ColumnDef<DataTableFeatures, Channel>[]>(
     () => [
       // Checkbox column
       ...(enableSelection
@@ -638,7 +639,10 @@ export function useChannelsColumns(
               header: ({ table }) => (
                 <Checkbox
                   checked={table.getIsAllPageRowsSelected()}
-                  indeterminate={table.getIsSomePageRowsSelected()}
+                  indeterminate={
+                    table.getIsSomePageRowsSelected() &&
+                    !table.getIsAllPageRowsSelected()
+                  }
                   onCheckedChange={(value) =>
                     table.toggleAllPageRowsSelected(!!value)
                   }
@@ -665,7 +669,7 @@ export function useChannelsColumns(
               enableHiding: false,
               enableResizing: false,
               size: 40,
-            } satisfies ColumnDef<Channel>,
+            } satisfies ColumnDef<DataTableFeatures, Channel>,
           ]
         : []),
 
@@ -883,15 +887,20 @@ export function useChannelsColumns(
                   <Tooltip>
                     <TooltipTrigger
                       render={
-                        <span
+                        <a
                           className='flex cursor-pointer items-center gap-1.5 text-xs font-medium'
+                          href={
+                            deploymentId
+                              ? `/models/deployments?dFilter=${encodeURIComponent(String(deploymentId))}`
+                              : undefined
+                          }
+                          target='_blank'
+                          rel='noopener noreferrer'
                           onClick={(e) => {
                             e.stopPropagation()
                             if (!deploymentId) {
-                              return
+                              e.preventDefault()
                             }
-                            const targetUrl = `/models/deployments?dFilter=${encodeURIComponent(String(deploymentId))}`
-                            window.open(targetUrl, '_blank', 'noopener')
                           }}
                         />
                       }

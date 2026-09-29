@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import type { Row, Table } from '@tanstack/react-table'
+import type { Row, RowData, ReactTable } from '@tanstack/react-table'
 import { Database } from 'lucide-react'
 /*
 Copyright (C) 2023-2026 QuantumNous
@@ -39,6 +39,7 @@ For commercial licensing, please contact support@quantumnous.com
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
   Empty,
@@ -53,14 +54,14 @@ import { cn } from '@/lib/utils'
 import { tableHasCompactMeta } from './card-cell-utils'
 import { CardRowContent } from './card-row-content'
 
-interface MobileCardListProps<TData> {
-  table: Table<TData>
+interface MobileCardListProps<TData extends RowData> {
+  table: ReactTable<DataTableFeatures, TData>
   enableRowSelection?: boolean
   isLoading?: boolean
   emptyTitle?: string
   emptyDescription?: string
-  getRowKey?: (row: Row<TData>) => string | number
-  getRowClassName?: (row: Row<TData>) => string | undefined
+  getRowKey?: (row: Row<DataTableFeatures, TData>) => string | number
+  getRowClassName?: (row: Row<DataTableFeatures, TData>) => string | undefined
 }
 
 function ListSkeleton() {
@@ -115,7 +116,9 @@ function FallbackListSkeleton() {
  * {@link CardRowContent}; see `card-row-content.tsx` for the column-meta
  * extensions (`mobileTitle`, `mobileBadge`, `mobileHidden`).
  */
-export function MobileCardList<TData>(props: MobileCardListProps<TData>) {
+export function MobileCardList<TData extends RowData>(
+  props: MobileCardListProps<TData>
+) {
   const {
     table,
     enableRowSelection = false,

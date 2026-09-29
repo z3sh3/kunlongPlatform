@@ -18,9 +18,11 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useQueryClient, useIsFetching } from '@tanstack/react-query'
 import { useNavigate, getRouteApi } from '@tanstack/react-router'
-import { type Table } from '@tanstack/react-table'
-import { useState, useEffect, useCallback } from 'react'
+import type { RowData, ReactTable } from '@tanstack/react-table'
+import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+
+import type { DataTableFeatures } from '@/components/data-table/features'
 
 import { buildSearchParams } from '../lib/filter'
 import { getDefaultTimeRange } from '../lib/utils'
@@ -38,8 +40,8 @@ const route = getRouteApi('/_authenticated/usage-logs/$section')
 type TaskLikeLogCategory = Extract<LogCategory, 'drawing' | 'task'>
 type TaskLogsFilters = DrawingLogFilters | TaskLogFilters
 
-interface TaskLogsFilterBarProps<TData> {
-  table: Table<TData>
+interface TaskLogsFilterBarProps<TData extends RowData> {
+  table: ReactTable<DataTableFeatures, TData>
   logCategory: TaskLikeLogCategory
 }
 
@@ -64,7 +66,9 @@ function setFilterValue(
   return { ...filters, taskId: value }
 }
 
-export function TaskLogsFilterBar<TData>(props: TaskLogsFilterBarProps<TData>) {
+export function TaskLogsFilterBar<TData extends RowData>(
+  props: TaskLogsFilterBarProps<TData>
+) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -77,7 +81,20 @@ export function TaskLogsFilterBar<TData>(props: TaskLogsFilterBarProps<TData>) {
     return { startTime: start, endTime: end }
   })
 
-  useEffect(() => {
+  // Adjust the local filter state whenever the URL search params change.
+  // The guarded setState during render is the React-recommended form of this
+  // sync (see "You Might Not Need an Effect"): it applies before paint and
+  // avoids the extra render an effect would cause.
+  const [syncedSignature, setSyncedSignature] = useState<string | null>(null)
+  const incomingSignature = JSON.stringify([
+    props.logCategory,
+    searchParams.startTime,
+    searchParams.endTime,
+    searchParams.channel,
+    searchParams.filter,
+  ])
+  if (syncedSignature !== incomingSignature) {
+    setSyncedSignature(incomingSignature)
     const { start, end } = getDefaultTimeRange()
     const baseFilters = {
       startTime: searchParams.startTime
@@ -100,13 +117,7 @@ export function TaskLogsFilterBar<TData>(props: TaskLogsFilterBarProps<TData>) {
           }
 
     setFilters(next)
-  }, [
-    props.logCategory,
-    searchParams.startTime,
-    searchParams.endTime,
-    searchParams.channel,
-    searchParams.filter,
-  ])
+  }
 
   const handleChange = useCallback(
     (field: keyof TaskLogsFilters, value: Date | string | undefined) => {

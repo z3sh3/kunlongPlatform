@@ -24,6 +24,7 @@ import {
   BadgeListCell,
   DataTableColumnHeader,
 } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { GroupBadge } from '@/components/group-badge'
 import { StatusBadge } from '@/components/status-badge'
 import { getLobeIcon } from '@/lib/lobe-icon'
@@ -42,7 +43,7 @@ export type PricingColumnsOptions = ModelPriceCellOptions
 
 export function usePricingColumns(
   options: PricingColumnsOptions = {}
-): ColumnDef<PricingModel>[] {
+): ColumnDef<DataTableFeatures, PricingModel>[] {
   const { t } = useTranslation()
 
   return [

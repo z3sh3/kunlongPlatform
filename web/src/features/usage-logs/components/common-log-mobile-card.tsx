@@ -16,12 +16,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { flexRender, type Cell } from '@tanstack/react-table'
+import { type RowData, flexRender, type Cell } from '@tanstack/react-table'
 import { ChevronRight, KeyRound } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { CopyButton } from '@/components/copy-button'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Dialog } from '@/components/dialog'
 import { GroupBadge } from '@/components/group-badge'
 import { StatusBadge, type StatusVariant } from '@/components/status-badge'
@@ -58,9 +59,9 @@ type LogField = {
 }
 
 /** Mobile summaries use tappable fields; desktop tooltip cells cannot reveal full text on touch. */
-export function CommonLogMobileCard<TData>(props: {
+export function CommonLogMobileCard<TData extends RowData>(props: {
   log: UsageLog
-  cells: Map<string, Cell<TData, unknown>>
+  cells: Map<string, Cell<DataTableFeatures, TData, unknown>>
 }) {
   const { t } = useTranslation()
   const context = useUsageLogsContext()

@@ -21,7 +21,7 @@ import type {
   OnChangeFn,
   PaginationState,
   RowSelectionState,
-  VisibilityState,
+  ColumnVisibilityState,
   SortingState,
 } from '@tanstack/react-table'
 import { Copy, Plus } from 'lucide-react'
@@ -166,6 +166,8 @@ const ModelRatioVisualEditorComponent = forwardRef<
   // Read through a ref so the table column definitions (and therefore every
   // rendered cell) do not need to be rebuilt each time a row is opened for
   // editing; rebuilding them remounts cells and drops the user's text selection.
+  // (React 19.3's useEffectEvent does not keep a stable function identity, so
+  // it cannot replace this ref without rebuilding the columns every render.)
   const editingModelNameRef = useRef<string | null>(null)
   useEffect(() => {
     editingModelNameRef.current = editData?.name ?? null
@@ -174,12 +176,12 @@ const ModelRatioVisualEditorComponent = forwardRef<
     pageIndex: 0,
     pageSize: 20,
   })
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-    () => {
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>(() => {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved) {
         try {
-          return safeJsonParse<VisibilityState>(saved, {
+          return safeJsonParse<ColumnVisibilityState>(saved, {
             fallback: {
               cacheRatio: false,
               createCacheRatio: false,
@@ -206,8 +208,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
         audioRatio: false,
         audioCompletionRatio: false,
       }
-    }
-  )
+    })
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(columnVisibility))
@@ -422,11 +423,17 @@ const ModelRatioVisualEditorComponent = forwardRef<
       )
       const billingModeMap = safeJsonParse<Record<string, string>>(
         billingMode,
-        { fallback: {}, silent: true }
+        {
+          fallback: {},
+          silent: true,
+        }
       )
       const billingExprMap = safeJsonParse<Record<string, string>>(
         billingExpr,
-        { fallback: {}, silent: true }
+        {
+          fallback: {},
+          silent: true,
+        }
       )
 
       delete priceMap[name]
@@ -629,7 +636,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
   const hasRows = table.getRowModel().rows.length > 0
 
   let emptyStateText = t('No models configured. Use Add model to get started.')
-  if (table.getState().globalFilter) {
+  if (table.state.globalFilter) {
     emptyStateText = t('No models match your search')
   } else if (filterMode === 'unset') {
     emptyStateText = candidateModelsLoading

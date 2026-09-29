@@ -19,10 +19,11 @@ For commercial licensing, please contact support@quantumnous.com
 import { ViewIcon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import type { ColumnDef } from '@tanstack/react-table'
-/* eslint-disable react-refresh/only-export-components */
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+/* eslint-disable react-refresh/only-export-components */
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { StatusBadge } from '@/components/status-badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { getUserAvatarFallback, getUserAvatarStyle } from '@/lib/avatar'
@@ -85,10 +86,10 @@ function TaskDetailsCell(props: {
 export function useTaskLogsColumns(
   isAdmin: boolean,
   isRoot: boolean
-): ColumnDef<TaskLog>[] {
+): ColumnDef<DataTableFeatures, TaskLog>[] {
   const { t } = useTranslation()
   return useMemo(() => {
-    const columns: ColumnDef<TaskLog>[] = [
+    const columns: ColumnDef<DataTableFeatures, TaskLog>[] = [
       {
         accessorKey: 'submit_time',
         header: t('Submit Time'),

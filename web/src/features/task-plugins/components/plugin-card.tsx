@@ -20,6 +20,7 @@ import { flexRender, type Row } from '@tanstack/react-table'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Badge } from '@/components/ui/badge'
 import { resolveLocalizedText } from '@/lib/localized-text'
 
@@ -46,7 +47,11 @@ const MAX_VISIBLE_MODELS = 4
  * sheet: rendering it here made every card a different height and buried the
  * plugin's own description under its parameter descriptions.
  */
-function PluginCardComponent({ row }: { row: Row<TaskPluginListItem> }) {
+function PluginCardComponent({
+  row,
+}: {
+  row: Row<DataTableFeatures, TaskPluginListItem>
+}) {
   const { t, i18n } = useTranslation()
   const cells = row.getAllCells()
   const description = resolveLocalizedText(

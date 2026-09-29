@@ -16,11 +16,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import type { Table as TanstackTable } from '@tanstack/react-table'
+import type { ReactTable as TanstackTable } from '@tanstack/react-table'
 import { Database } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { DISABLED_ROW_MOBILE } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { MaskedValueDisplay } from '@/components/masked-value-display'
 import { StatusBadge } from '@/components/status-badge'
 import {
@@ -71,7 +72,7 @@ function RedemptionsMobileSkeleton() {
 }
 
 interface RedemptionsMobileListProps {
-  table: TanstackTable<Redemption>
+  table: TanstackTable<DataTableFeatures, Redemption>
   isLoading: boolean
 }
 

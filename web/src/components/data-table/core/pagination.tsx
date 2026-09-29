@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import type { Table } from '@tanstack/react-table'
+import type { RowData, ReactTable } from '@tanstack/react-table'
 import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -36,8 +37,8 @@ import {
 } from '@/components/ui/select'
 import { cn, getPageNumbers } from '@/lib/utils'
 
-type DataTablePaginationProps<TData> = {
-  table: Table<TData>
+type DataTablePaginationProps<TData extends RowData> = {
+  table: ReactTable<DataTableFeatures, TData>
   compact?: boolean
 }
 
@@ -47,12 +48,12 @@ const PAGE_SIZE_SELECT_ITEMS = PAGE_SIZE_OPTIONS.map((pageSize) => ({
   label: pageSize,
 }))
 
-export function DataTablePagination<TData>({
+export function DataTablePagination<TData extends RowData>({
   table,
   compact = false,
 }: DataTablePaginationProps<TData>) {
   const { t } = useTranslation()
-  const pagination = table.getState().pagination
+  const pagination = table.state.pagination
   const currentPage = pagination.pageIndex + 1
   const pageSize = pagination.pageSize
   const totalPages = table.getPageCount()

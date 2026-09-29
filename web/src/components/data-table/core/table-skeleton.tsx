@@ -16,8 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import type { Table } from '@tanstack/react-table'
+import type { RowData, ReactTable } from '@tanstack/react-table'
 
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TableRow, TableCell } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
@@ -35,14 +36,14 @@ const SKELETON_WIDTHS = [
   '45%',
 ]
 
-interface TableSkeletonProps<TData> {
-  table: Table<TData>
+interface TableSkeletonProps<TData extends RowData> {
+  table: ReactTable<DataTableFeatures, TData>
   rowCount?: number
   rowHeight?: string
   keyPrefix?: string
 }
 
-export function TableSkeleton<TData>({
+export function TableSkeleton<TData extends RowData>({
   table,
   rowCount,
   rowHeight = 'h-[52px]',
@@ -51,7 +52,7 @@ export function TableSkeleton<TData>({
   const visibleColumns = table.getVisibleLeafColumns()
 
   const finalRowCount =
-    rowCount ?? Math.min(table.getState().pagination?.pageSize || 20, 20)
+    rowCount ?? Math.min(table.state.pagination?.pageSize || 20, 20)
 
   return (
     <>

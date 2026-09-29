@@ -35,6 +35,7 @@ import { toast } from 'sonner'
 
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { DataTableRowActionMenu } from '@/components/data-table/core/row-action-menu'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenuItem,
@@ -62,7 +63,7 @@ import { UserBindingDialog } from './dialogs/user-binding-dialog'
 import { useUsers } from './users-provider'
 
 interface DataTableRowActionsProps {
-  row: Row<User>
+  row: Row<DataTableFeatures, User>
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {

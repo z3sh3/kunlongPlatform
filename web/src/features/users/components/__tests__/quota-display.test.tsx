@@ -24,11 +24,7 @@ import {
   createRouter,
   RouterProvider,
 } from '@tanstack/react-router'
-import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from '@tanstack/react-table'
+import { useTable, flexRender } from '@tanstack/react-table'
 import {
   act,
   cleanup,
@@ -42,6 +38,7 @@ import { createInstance } from 'i18next'
 import { I18nextProvider } from 'react-i18next'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 
+import { dataTableFeatures } from '@/components/data-table/features'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import zh from '@/i18n/locales/zh.json'
 import { api } from '@/lib/api'
@@ -71,7 +68,8 @@ function QuotaTable(props: { remaining: number; used: number }) {
       column.id ?? ('accessorKey' in column ? String(column.accessorKey) : '')
     )
   )
-  const table = useReactTable({
+  const table = useTable({
+    features: dataTableFeatures,
     columns,
     data: [
       {
@@ -86,7 +84,6 @@ function QuotaTable(props: { remaining: number; used: number }) {
         group: 'default',
       } as User,
     ],
-    getCoreRowModel: getCoreRowModel(),
   })
   return (
     <table>

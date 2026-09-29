@@ -25,6 +25,7 @@ import { toast } from 'sonner'
 
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { DataTablePage, useDataTable } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -129,7 +130,9 @@ export function PluginsTable(props: PluginsTableProps) {
       handleServerError(error)
     },
   })
-  const columns = useMemo<ColumnDef<TaskPluginListItem, unknown>[]>(
+  const columns = useMemo<
+    ColumnDef<DataTableFeatures, TaskPluginListItem, unknown>[]
+  >(
     () => [
       {
         id: 'plugin',

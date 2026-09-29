@@ -20,27 +20,40 @@ import {
   type ColumnDef,
   type ColumnFiltersState,
   type ColumnSizingState,
+  type ColumnVisibilityState,
   type ExpandedState,
   type OnChangeFn,
   type PaginationState,
   type RowSelectionState,
+  type RowData,
   type SortingState,
   type TableOptions,
   type Updater,
-  type VisibilityState,
-  getCoreRowModel,
-  getExpandedRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
+  columnFacetingFeature,
+  columnFilteringFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  createExpandedRowModel,
+  createFacetedRowModel,
+  createFacetedUniqueValues,
+  createFilteredRowModel,
+  createPaginatedRowModel,
+  createSortedRowModel,
+  globalFilteringFeature,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+  tableFeatures,
+  useTable,
 } from '@tanstack/react-table'
 import * as React from 'react'
 
-type DataTableFeatureOptions<TData> = Pick<
-  TableOptions<TData>,
+import type { DataTableFeatures } from '../features'
+
+type DataTableFeatureOptions<TData extends RowData> = Pick<
+  TableOptions<DataTableFeatures, TData>,
   | 'enableRowSelection'
   | 'getRowId'
   | 'getSubRows'
@@ -57,10 +70,10 @@ type DataTableStateOptions = {
   initialSorting?: SortingState
   sorting?: SortingState
   onSortingChange?: OnChangeFn<SortingState>
-  initialColumnVisibility?: VisibilityState
+  initialColumnVisibility?: ColumnVisibilityState
   columnVisibilityStorageKey?: string | false
-  columnVisibility?: VisibilityState
-  onColumnVisibilityChange?: OnChangeFn<VisibilityState>
+  columnVisibility?: ColumnVisibilityState
+  onColumnVisibilityChange?: OnChangeFn<ColumnVisibilityState>
   initialColumnSizing?: ColumnSizingState
   columnSizingStorageKey?: string | false
   columnSizing?: ColumnSizingState
@@ -88,15 +101,16 @@ type DataTableRowModelOptions = {
   withExpandedRowModel?: boolean
 }
 
-type UseDataTableOptions<TData> = DataTableFeatureOptions<TData> &
-  DataTableStateOptions &
-  DataTableRowModelOptions & {
-    data: TData[]
-    columns: ColumnDef<TData, unknown>[]
-    totalCount?: number
-    pageCount?: number
-    ensurePageInRange?: (pageCount: number) => void
-  }
+type UseDataTableOptions<TData extends RowData> =
+  DataTableFeatureOptions<TData> &
+    DataTableStateOptions &
+    DataTableRowModelOptions & {
+      data: TData[]
+      columns: ColumnDef<DataTableFeatures, TData, unknown>[]
+      totalCount?: number
+      pageCount?: number
+      ensurePageInRange?: (pageCount: number) => void
+    }
 
 type ColumnSizingBounds = Record<
   string,
@@ -106,9 +120,13 @@ type ColumnSizingBounds = Record<
   }
 >
 
-type ColumnWithSizing<TData> = ColumnDef<TData, unknown> & {
+type ColumnWithSizing<TData extends RowData> = ColumnDef<
+  DataTableFeatures,
+  TData,
+  unknown
+> & {
   accessorKey?: string | number
-  columns?: ColumnDef<TData, unknown>[]
+  columns?: ColumnDef<DataTableFeatures, TData, unknown>[]
 }
 
 const COLUMN_SIZING_PERSIST_DELAY_MS = 250
@@ -145,7 +163,9 @@ function useControllableTableState<TValue>(
   return [value, setValue]
 }
 
-function readColumnVisibility(storageKey: string | undefined): VisibilityState {
+function readColumnVisibility(
+  storageKey: string | undefined
+): ColumnVisibilityState {
   if (!storageKey || typeof window === 'undefined') return {}
 
   try {
@@ -157,7 +177,7 @@ function readColumnVisibility(storageKey: string | undefined): VisibilityState {
       return {}
     }
 
-    return Object.entries(parsed).reduce<VisibilityState>(
+    return Object.entries(parsed).reduce<ColumnVisibilityState>(
       (visibility, [key, value]) => {
         if (typeof value === 'boolean') {
           visibility[key] = value
@@ -171,7 +191,9 @@ function readColumnVisibility(storageKey: string | undefined): VisibilityState {
   }
 }
 
-function getColumnId<TData>(column: ColumnDef<TData, unknown>) {
+function getColumnId<TData extends RowData>(
+  column: ColumnDef<DataTableFeatures, TData, unknown>
+) {
   const columnWithSizing = column as ColumnWithSizing<TData>
 
   if (typeof columnWithSizing.id === 'string') {
@@ -189,8 +211,8 @@ function getColumnId<TData>(column: ColumnDef<TData, unknown>) {
   return undefined
 }
 
-function buildColumnSizingBounds<TData>(
-  columns: ColumnDef<TData, unknown>[]
+function buildColumnSizingBounds<TData extends RowData>(
+  columns: ColumnDef<DataTableFeatures, TData, unknown>[]
 ): ColumnSizingBounds {
   return columns.reduce<ColumnSizingBounds>((bounds, column) => {
     const columnWithSizing = column as ColumnWithSizing<TData>
@@ -275,7 +297,9 @@ function readColumnSizing(
   }
 }
 
-export function useDataTable<TData>(options: UseDataTableOptions<TData>) {
+export function useDataTable<TData extends RowData>(
+  options: UseDataTableOptions<TData>
+) {
   const {
     data,
     columns,
@@ -377,7 +401,68 @@ export function useDataTable<TData>(options: UseDataTableOptions<TData>) {
       Boolean(options.sorting) ||
       Boolean(options.onSortingChange))
 
-  const table = useReactTable({
+  // v9 registers row-model factories on the feature set. Register them
+  // conditionally to preserve the v8 semantics the table options relied on:
+  // sorting was disabled under manual pagination, and faceting/filtered row
+  // models were skipped for manually filtered tables. The object is typed as
+  // the shared DataTableFeatures so column definitions stay uniform.
+  const features = React.useMemo(() => {
+    const rowModels: Record<string, unknown> = {}
+    if (withSortedRowModel) {
+      rowModels.sortedRowModel = createSortedRowModel()
+    }
+    if (withFilteredRowModel) {
+      rowModels.filteredRowModel = createFilteredRowModel()
+    }
+    if (withPaginationRowModel) {
+      rowModels.paginatedRowModel = createPaginatedRowModel()
+    }
+    if (withFacetedRowModel) {
+      rowModels.facetedRowModel = createFacetedRowModel()
+      rowModels.facetedUniqueValues = createFacetedUniqueValues()
+    }
+    if (withExpandedRowModel) {
+      rowModels.expandedRowModel = createExpandedRowModel()
+    }
+    return tableFeatures({
+      rowSelectionFeature,
+      rowSortingFeature,
+      rowPaginationFeature,
+      columnFilteringFeature,
+      globalFilteringFeature,
+      columnVisibilityFeature,
+      columnSizingFeature,
+      columnResizingFeature,
+      rowExpandingFeature,
+      columnFacetingFeature,
+      ...rowModels,
+    } as DataTableFeatures)
+  }, [
+    withSortedRowModel,
+    withFilteredRowModel,
+    withPaginationRowModel,
+    withFacetedRowModel,
+    withExpandedRowModel,
+  ])
+
+  // v9 syncs controlled state slices into the table store on every render
+  // and reacts to their identity, where v8 tolerated fresh references.
+  // Inline `columnFilters` arrays (for example `[]` literals) would
+  // otherwise churn the store and remount the table rows, so reuse the
+  // previous array reference whenever the serialized content is unchanged.
+  const columnFiltersSignature = options.columnFilters
+    ? JSON.stringify(options.columnFilters)
+    : undefined
+  // The signature (not the array identity) is the memo dependency: when the
+  // content is unchanged the cached reference is reused.
+  const stableColumnFilters = React.useMemo<ColumnFiltersState | undefined>(
+    () => options.columnFilters,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [columnFiltersSignature]
+  )
+
+  const table = useTable({
+    features,
     data,
     columns,
     rowCount: totalCount,
@@ -388,7 +473,7 @@ export function useDataTable<TData>(options: UseDataTableOptions<TData>) {
       columnSizing,
       rowSelection,
       expanded,
-      columnFilters: options.columnFilters,
+      columnFilters: stableColumnFilters,
       globalFilter: options.globalFilter,
       pagination,
     },
@@ -411,21 +496,6 @@ export function useDataTable<TData>(options: UseDataTableOptions<TData>) {
     onColumnFiltersChange: options.onColumnFiltersChange,
     onGlobalFilterChange: options.onGlobalFilterChange,
     onPaginationChange,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: withFilteredRowModel
-      ? getFilteredRowModel()
-      : undefined,
-    getPaginationRowModel: withPaginationRowModel
-      ? getPaginationRowModel()
-      : undefined,
-    getSortedRowModel: withSortedRowModel ? getSortedRowModel() : undefined,
-    getFacetedRowModel: withFacetedRowModel ? getFacetedRowModel() : undefined,
-    getFacetedUniqueValues: withFacetedRowModel
-      ? getFacetedUniqueValues()
-      : undefined,
-    getExpandedRowModel: withExpandedRowModel
-      ? getExpandedRowModel()
-      : undefined,
   })
 
   const actualPageCount = table.getPageCount()

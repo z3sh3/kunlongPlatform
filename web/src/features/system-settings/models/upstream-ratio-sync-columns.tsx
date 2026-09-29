@@ -21,6 +21,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { DataTableColumnHeader } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 
 import {
   SyncPriceCell,
@@ -33,7 +34,7 @@ import type { PricingSyncRow } from './upstream-ratio-sync-table'
 export function useUpstreamRatioSyncColumns(
   upstreamNames: string[],
   isMobile: boolean
-): ColumnDef<PricingSyncRow>[] {
+): ColumnDef<DataTableFeatures, PricingSyncRow>[] {
   const { t } = useTranslation()
   // Selection travels through context so toggling a checkbox does not replace
   // column renderer functions, remount the control and lose keyboard focus.
@@ -69,7 +70,7 @@ export function useUpstreamRatioSyncColumns(
         ),
       },
       ...upstreamNames.map(
-        (source): ColumnDef<PricingSyncRow> => ({
+        (source): ColumnDef<DataTableFeatures, PricingSyncRow> => ({
           id: `upstream_${source}`,
           size: upstreamNames.length === 1 ? 420 : 320,
           minSize: 280,

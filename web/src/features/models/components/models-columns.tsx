@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next'
 
 import { CopyButton } from '@/components/copy-button'
 import { BadgeListCell, TruncatedCell } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { StatusBadge } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -54,7 +55,7 @@ export function useModelsColumns(
   vendors: Vendor[] = EMPTY_VENDORS,
   pricing?: ModelPricingConfig,
   pricingState?: 'loading' | 'error'
-): ColumnDef<Model>[] {
+): ColumnDef<DataTableFeatures, Model>[] {
   const { t } = useTranslation()
   const canPrice = useCanEditModelPricing()
   const { setCurrentRow, setOpen } = useModels()
@@ -67,7 +68,7 @@ export function useModelsColumns(
       new Map(pricing?.entries.map((entry) => [entry.model_name, entry]) ?? []),
     [pricing]
   )
-  return useMemo<ColumnDef<Model>[]>(() => {
+  return useMemo<ColumnDef<DataTableFeatures, Model>[]>(() => {
     const rules = getNameRuleConfig(t)
     return [
       {
@@ -75,7 +76,10 @@ export function useModelsColumns(
         header: ({ table }) => (
           <Checkbox
             checked={table.getIsAllPageRowsSelected()}
-            indeterminate={table.getIsSomePageRowsSelected()}
+            indeterminate={
+              table.getIsSomePageRowsSelected() &&
+              !table.getIsAllPageRowsSelected()
+            }
             onCheckedChange={(value) =>
               table.toggleAllPageRowsSelected(Boolean(value))
             }

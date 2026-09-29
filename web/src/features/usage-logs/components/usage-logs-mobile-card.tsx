@@ -16,10 +16,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { flexRender, type Cell, type Table } from '@tanstack/react-table'
+import {
+  type RowData,
+  flexRender,
+  type Cell,
+  type ReactTable,
+} from '@tanstack/react-table'
 import { Database } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import type { DataTableFeatures } from '@/components/data-table/features'
 import {
   Empty,
   EmptyDescription,
@@ -43,8 +49,8 @@ const logTypeRowTint: Record<number, string> = {
     'bg-blue-50/30 dark:bg-blue-950/15 border-blue-200/50 dark:border-blue-900/30',
 }
 
-interface UsageLogsMobileListProps<TData> {
-  table: Table<TData>
+interface UsageLogsMobileListProps<TData extends RowData> {
+  table: ReactTable<DataTableFeatures, TData>
   isLoading?: boolean
   emptyTitle?: string
   emptyDescription?: string
@@ -91,13 +97,13 @@ function UsageLogsMobileSkeleton(props: { separate: boolean }) {
   )
 }
 
-function CompactCell<TData>({
+function CompactCell<TData extends RowData>({
   cell,
   fallback = '-',
   className,
   primaryOnly = false,
 }: {
-  cell?: Cell<TData, unknown>
+  cell?: Cell<DataTableFeatures, TData, unknown>
   fallback?: string
   className?: string
   primaryOnly?: boolean
@@ -120,7 +126,7 @@ function CompactCell<TData>({
   )
 }
 
-function SummaryField<TData>({
+function SummaryField<TData extends RowData>({
   label,
   cell,
   className,
@@ -128,7 +134,7 @@ function SummaryField<TData>({
   primaryOnly = false,
 }: {
   label?: string
-  cell?: Cell<TData, unknown>
+  cell?: Cell<DataTableFeatures, TData, unknown>
   className?: string
   valueClassName?: string
   primaryOnly?: boolean
@@ -153,10 +159,10 @@ function SummaryField<TData>({
   )
 }
 
-function TaskLogsCard<TData>({
+function TaskLogsCard<TData extends RowData>({
   cells,
 }: {
-  cells: Map<string, Cell<TData, unknown>>
+  cells: Map<string, Cell<DataTableFeatures, TData, unknown>>
 }) {
   const { t } = useTranslation()
 
@@ -189,10 +195,10 @@ function TaskLogsCard<TData>({
   )
 }
 
-function DrawingLogsCard<TData>({
+function DrawingLogsCard<TData extends RowData>({
   cells,
 }: {
-  cells: Map<string, Cell<TData, unknown>>
+  cells: Map<string, Cell<DataTableFeatures, TData, unknown>>
 }) {
   const { t } = useTranslation()
 
@@ -236,7 +242,7 @@ function DrawingLogsCard<TData>({
   )
 }
 
-export function UsageLogsMobileList<TData>({
+export function UsageLogsMobileList<TData extends RowData>({
   table,
   isLoading = false,
   emptyTitle,

@@ -21,6 +21,7 @@ import { GitBranch, Sparkles, KeyRound } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { GroupBadge } from '@/components/group-badge'
 import { StatusBadge, type StatusBadgeProps } from '@/components/status-badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -342,11 +343,11 @@ export function useCommonLogsColumns(
   isAdmin: boolean,
   isRoot: boolean,
   showBillingSource = false
-): ColumnDef<UsageLog>[] {
+): ColumnDef<DataTableFeatures, UsageLog>[] {
   const { t } = useTranslation()
   const currency = useSystemConfigStore((state) => state.config.currency)
   return useMemo(() => {
-    const columns: ColumnDef<UsageLog>[] = [
+    const columns: ColumnDef<DataTableFeatures, UsageLog>[] = [
       {
         accessorKey: 'created_at',
         header: t('Time'),

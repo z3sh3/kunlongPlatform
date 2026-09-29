@@ -18,7 +18,10 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
-import { flexRender, type Table as TanstackTable } from '@tanstack/react-table'
+import {
+  flexRender,
+  type ReactTable as TanstackTable,
+} from '@tanstack/react-table'
 import { Database } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -30,6 +33,7 @@ import {
   useDebouncedColumnFilter,
   useDataTable,
 } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { StatusBadge } from '@/components/status-badge'
 import {
   Empty,
@@ -103,7 +107,7 @@ function ApiKeysMobileList({
   isLoading,
   now,
 }: {
-  table: TanstackTable<ApiKey>
+  table: TanstackTable<DataTableFeatures, ApiKey>
   isLoading: boolean
   now: number
 }) {
@@ -321,7 +325,7 @@ export function ApiKeysTable() {
     ensurePageInRange,
   })
 
-  const columnVisibility = table.getState().columnVisibility
+  const columnVisibility = table.state.columnVisibility
   useEffect(() => {
     // Restore the dates hidden by the previous default when adopting the combined time column.
     if (

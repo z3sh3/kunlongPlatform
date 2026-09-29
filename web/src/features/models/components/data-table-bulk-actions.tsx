@@ -17,13 +17,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useQueryClient } from '@tanstack/react-query'
-import type { Table } from '@tanstack/react-table'
+import type { RowData, ReactTable } from '@tanstack/react-table'
 import { Eye, EyeOff, Trash2, Copy, Building2, Unlink } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Button } from '@/components/ui/button'
 import {
   Tooltip,
@@ -38,11 +39,11 @@ import type { VendorOperation } from '../vendor-api'
 import { ModelDeleteDialog } from './dialogs/model-delete-dialog'
 import { VendorOperationDialog } from './dialogs/vendor-operation-dialog'
 
-interface DataTableBulkActionsProps<TData> {
-  table: Table<TData>
+interface DataTableBulkActionsProps<TData extends RowData> {
+  table: ReactTable<DataTableFeatures, TData>
 }
 
-export function DataTableBulkActions<TData>({
+export function DataTableBulkActions<TData extends RowData>({
   table,
 }: DataTableBulkActionsProps<TData>) {
   const { t } = useTranslation()

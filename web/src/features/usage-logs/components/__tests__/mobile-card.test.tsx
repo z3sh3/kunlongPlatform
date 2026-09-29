@@ -17,14 +17,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import {
-  getCoreRowModel,
-  useReactTable,
-  type VisibilityState,
-} from '@tanstack/react-table'
+import { useTable, type ColumnVisibilityState } from '@tanstack/react-table'
 import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { expect, it, vi } from 'vitest'
+
+import { dataTableFeatures } from '@/components/data-table/features'
 
 import { usageLogSchema, type UsageLog } from '../../data/schema'
 import { useCommonLogsColumns } from '../columns/common-logs-columns'
@@ -57,16 +55,17 @@ const log = usageLogSchema.parse({
 
 function Fixture(props: {
   admin?: boolean
-  visibility?: VisibilityState
+  visibility?: ColumnVisibilityState
   logs?: UsageLog[]
   loading?: boolean
 }) {
   const columns = useCommonLogsColumns(props.admin ?? true, false)
   const context = useUsageLogsContext()
-  const table = useReactTable({
+  const table = useTable({
+    features: dataTableFeatures,
     data: props.logs ?? [log],
     columns,
-    getCoreRowModel: getCoreRowModel(),
+
     state: { columnVisibility: props.visibility ?? {} },
   })
   return (

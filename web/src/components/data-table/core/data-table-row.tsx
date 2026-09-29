@@ -17,37 +17,43 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import {
+  type RowData,
   flexRender,
   type Cell,
   type Row,
-  type Table as TanstackTable,
+  type ReactTable as TanstackTable,
 } from '@tanstack/react-table'
 import * as React from 'react'
 
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { TableCell, TableRow } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 
 import { TruncatedCell } from './truncated-cell'
 import type { DataTableColumnClassName } from './types'
 
-type DataTableRowProps<TData> = {
-  row: Row<TData>
+type DataTableRowProps<TData extends RowData> = {
+  row: Row<DataTableFeatures, TData>
   className?: string
   getColumnClassName?: DataTableColumnClassName
-  cellRenderColumns?: TanstackTable<TData>['options']['columns']
+  cellRenderColumns?: TanstackTable<
+    DataTableFeatures,
+    TData
+  >['options']['columns']
 } & Omit<React.ComponentProps<typeof TableRow>, 'children'>
 
-type DataTableRowInnerProps<TData> = DataTableRowProps<TData> & {
-  isSelected: boolean
-  /**
-   * Stable signature of currently visible leaf columns for this row.
-   * Captured outside the memo comparator so visibility toggles re-render
-   * even when the TanStack row object reference stays the same.
-   */
-  visibleColumnIds: string
-}
+type DataTableRowInnerProps<TData extends RowData> =
+  DataTableRowProps<TData> & {
+    isSelected: boolean
+    /**
+     * Stable signature of currently visible leaf columns for this row.
+     * Captured outside the memo comparator so visibility toggles re-render
+     * even when the TanStack row object reference stays the same.
+     */
+    visibleColumnIds: string
+  }
 
-function DataTableRowInner<TData>({
+function DataTableRowInner<TData extends RowData>({
   row,
   isSelected,
   className,
@@ -108,7 +114,9 @@ const MemoizedDataTableRow = React.memo(DataTableRowInner, (prev, next) => {
   )
 }) as typeof DataTableRowInner
 
-export function DataTableRow<TData>(props: DataTableRowProps<TData>) {
+export function DataTableRow<TData extends RowData>(
+  props: DataTableRowProps<TData>
+) {
   const visibleColumnIds = props.row
     .getVisibleCells()
     .map((cell) => cell.column.id)
@@ -123,7 +131,9 @@ export function DataTableRow<TData>(props: DataTableRowProps<TData>) {
   )
 }
 
-function renderCellContent<TData>(cell: Cell<TData, unknown>) {
+function renderCellContent<TData extends RowData>(
+  cell: Cell<DataTableFeatures, TData, unknown>
+) {
   const content = flexRender(cell.column.columnDef.cell, cell.getContext())
   const textContent = getPrimitiveTextContent(content)
 

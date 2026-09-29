@@ -23,6 +23,7 @@ import userEvent from '@testing-library/user-event'
 import { AxiosError } from 'axios'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { pricingOptions } from '@/features/model-pricing/pricing'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth-store'
@@ -60,7 +61,9 @@ function renderModelActions(currentModel: Model = model, role = 100) {
   render(
     <QueryClientProvider client={client}>
       <ModelsProvider>
-        <DataTableRowActions row={{ original: currentModel } as Row<Model>} />
+        <DataTableRowActions
+          row={{ original: currentModel } as Row<DataTableFeatures, Model>}
+        />
         <ModelsDialogs />
       </ModelsProvider>
     </QueryClientProvider>

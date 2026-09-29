@@ -16,11 +16,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { type ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { BadgeCell } from '@/components/data-table'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { GroupBadge } from '@/components/group-badge'
 import { StatusBadge } from '@/components/status-badge'
 import { TableId } from '@/components/table-id'
@@ -30,11 +31,14 @@ import { formatDuration, formatResetPeriod } from '../lib'
 import type { PlanRecord } from '../types'
 import { DataTableRowActions } from './data-table-row-actions'
 
-export function useSubscriptionsColumns(): ColumnDef<PlanRecord>[] {
+export function useSubscriptionsColumns(): ColumnDef<
+  DataTableFeatures,
+  PlanRecord
+>[] {
   const { t } = useTranslation()
 
   return useMemo(
-    (): ColumnDef<PlanRecord>[] => [
+    (): ColumnDef<DataTableFeatures, PlanRecord>[] => [
       {
         accessorFn: (row) => row.plan.id,
         id: 'id',

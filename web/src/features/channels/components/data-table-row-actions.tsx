@@ -38,6 +38,7 @@ import { useContext, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { ConfirmDialog } from '@/components/confirm-dialog'
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -73,7 +74,7 @@ import { ChannelRowActionsLayoutContext } from './channel-row-actions-context'
 import { useChannels } from './channels-provider'
 
 interface DataTableRowActionsProps {
-  row: Row<Channel>
+  row: Row<DataTableFeatures, Channel>
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {

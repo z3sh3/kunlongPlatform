@@ -20,6 +20,7 @@ import type { Row } from '@tanstack/react-table'
 import { Pencil, Power, PowerOff, RotateCcw } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Button } from '@/components/ui/button'
 import {
   Tooltip,
@@ -31,7 +32,7 @@ import type { PlanRecord } from '../types'
 import { useSubscriptions } from './subscriptions-provider'
 
 interface DataTableRowActionsProps {
-  row: Row<PlanRecord>
+  row: Row<DataTableFeatures, PlanRecord>
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
