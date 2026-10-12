@@ -22,6 +22,7 @@ import (
 	"github.com/QuantumNous/new-api/logger"
 	"github.com/QuantumNous/new-api/middleware"
 	"github.com/QuantumNous/new-api/model"
+	"github.com/QuantumNous/new-api/modules"
 	"github.com/QuantumNous/new-api/oauth"
 	"github.com/QuantumNous/new-api/pkg/jsplugin"
 	perfmetrics "github.com/QuantumNous/new-api/pkg/perf_metrics"
@@ -318,6 +319,14 @@ func InitResources() error {
 	}
 	if err = authz.Init(model.DB); err != nil {
 		common.FatalLog("failed to initialize authorization: " + err.Error())
+		return err
+	}
+	// Migrate the independent console module tables (data marketplace,
+	// model training, agent workshop, talent training, enterprise
+	// incubation). Registered here instead of model/main.go so module
+	// packages never leak into the model package.
+	if err = modules.MigrateAll(); err != nil {
+		common.FatalLog("failed to migrate console modules: " + err.Error())
 		return err
 	}
 	if common.PasswordLoginEncryptionEnabled {
