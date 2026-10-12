@@ -112,6 +112,9 @@ RSYNC_EXCLUDES=(
   --exclude='*.db-shm'
   --exclude='*.db-wal'
   --exclude='upload/'
+  # dify stack runtime state: bind mounts live under docker/dify/volumes/
+  # (docker/dify/.env secrets are covered by the '.env' exclude below)
+  --exclude='docker/dify/volumes/'
 
   # secrets — .env is transferred only via --env <file>; the .env.example
   # template is harmless and kept for reference on the server.

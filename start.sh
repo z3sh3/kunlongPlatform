@@ -9,6 +9,11 @@
 #   2. Start the stack via docker compose with explicit env/project/file paths.
 #   3. Verify the configured DB role/database exist; fail fast (not crash-loop)
 #      when a pre-existing cluster was initialized with different credentials.
+#   4. Optionally start the Dify (agent development) stack as a separate compose
+#      project `dify` when DIFY_ENABLED=true in the env file: create the shared
+#      dify/dify_plugin databases, render docker/dify/.env from the vendored
+#      template (random secrets generated once, derived values always fresh),
+#      then `docker compose -p dify ... up -d`.
 #
 # Usage:
 #   ./start.sh [--build] [--force]
@@ -135,3 +140,116 @@ EOF
 fi
 
 echo "[start] stack is up; new-api reachable at https://<domain> (automatic HTTPS when DOMAIN is set) or http://<public-ip> on :80, via caddy"
+
+# --- 4. Dify (agent development) stack (optional) -----------------------------
+# Runs as its own compose project `dify` (see docker/dify/) and reuses the
+# postgres/redis containers of the `newapi` project over the shared
+# newapi_default network. Enabled via DIFY_ENABLED=true in the env file.
+DIFY_ENABLED="$(env_value DIFY_ENABLED false)"
+if [ "$DIFY_ENABLED" != "true" ]; then
+  echo "[start] dify stack disabled (set DIFY_ENABLED=true to enable); skipping"
+  exit 0
+fi
+
+DIFY_DIR="docker/dify"
+DIFY_ENV="$DIFY_DIR/.env"
+DIFY_TEMPLATE="$DIFY_DIR/.env.example"
+if [ ! -f "$DIFY_TEMPLATE" ]; then
+  echo "[start] ERROR: $DIFY_TEMPLATE is missing; cannot start the dify stack" >&2
+  exit 1
+fi
+
+# 4a. idempotently create the dify databases in the shared postgres cluster.
+#     Local psql inside the container authenticates over the trust socket,
+#     same as the role/database check above.
+for dify_db in dify dify_plugin; do
+  if ! compose exec -T postgres psql -U "$POSTGRES_USER" -d postgres -tAc \
+      "SELECT 1 FROM pg_database WHERE datname='$dify_db'" | grep -q 1; then
+    echo "[start] creating database: $dify_db"
+    compose exec -T postgres psql -U "$POSTGRES_USER" -d postgres -c "CREATE DATABASE \"$dify_db\"" >/dev/null
+  fi
+done
+
+# 4b. (re)render docker/dify/.env from the vendored template. Secrets marked
+#     with __GEN_*__ placeholders are generated once (openssl rand -base64 42)
+#     and then carried over from an existing .env on later runs; derived values
+#     (shared credentials, port) are refreshed from the root env file on every
+#     run so credential rotations propagate. Upstream sample defaults are
+#     never used.
+POSTGRES_PASSWORD_VAL="$(env_value POSTGRES_PASSWORD '')"
+REDIS_PASSWORD_VAL="$(env_value REDIS_PASSWORD '')"
+if [ -z "$POSTGRES_PASSWORD_VAL" ] || [ -z "$REDIS_PASSWORD_VAL" ]; then
+  echo "[start] ERROR: POSTGRES_PASSWORD/REDIS_PASSWORD are required to render $DIFY_ENV" >&2
+  exit 1
+fi
+AGENT_DEV_PORT_VAL="$(env_value AGENT_DEV_PORT 8081)"
+
+# Seed each __GEN_*__ secret from an existing docker/dify/.env when present,
+# otherwise generate a fresh random value. DIFY_INIT_PASSWORD_GENERATED flags a
+# first-boot bootstrap-gate password so we can tell the operator where to find
+# it (INIT_PASSWORD is consumed once during console initialization but is
+# persisted like the rest).
+DIFY_INIT_PASSWORD_GENERATED=0
+DIFF_TMP="$DIFY_DIR/.env.tmp.render"
+cp "$DIFY_TEMPLATE" "$DIFF_TMP"
+
+# Escape sed replacement metacharacters (&, backslash, the | delimiter) so
+# operator-chosen passwords from the root env file cannot break substitution.
+sed_escape() { printf '%s' "$1" | sed -e 's/[\\|&]/\\&/g'; }
+for pair in \
+  'SECRET_KEY|__GEN_SECRET_KEY__' \
+  'INIT_PASSWORD|__GEN_INIT_PASSWORD__' \
+  'WEAVIATE_API_KEY|__GEN_WEAVIATE_API_KEY__' \
+  'SANDBOX_API_KEY|__GEN_SANDBOX_API_KEY__' \
+  'PLUGIN_DAEMON_KEY|__GEN_PLUGIN_DAEMON_KEY__' \
+  'PLUGIN_DIFY_INNER_API_KEY|__GEN_PLUGIN_INNER_KEY__' \
+  'DIFY_AGENT_API_TOKEN|__GEN_AGENT_API_TOKEN__' \
+  'DIFY_AGENT_SERVER_SECRET_KEY|__GEN_AGENT_SERVER_KEY__' \
+  'DIFY_AGENT_LOCAL_SANDBOX_AUTH_TOKEN|__GEN_AGENT_SANDBOX_TOKEN__'; do
+  dify_key="${pair%%|*}"; placeholder="${pair#*|}"
+  val=""
+  if [ -f "$DIFY_ENV" ]; then
+    val="$(sed -n "s/^${dify_key}=//p" "$DIFY_ENV" | tail -n 1 || true)"
+  fi
+  case "$dify_key" in
+    INIT_PASSWORD)
+      # Dify's console validates the bootstrap password with
+      # max_length=30 (api/controllers/console/init_validate.py).
+      # Regenerate legacy values that exceed the limit instead of
+      # carrying them over (harmless: the gate is single-use).
+      if [ "${#val}" -gt 30 ]; then val=""; fi
+      ;;
+  esac
+  if [ -z "$val" ]; then
+    if [ "$dify_key" = "INIT_PASSWORD" ]; then
+      # 28 base64 chars (21 bytes, no padding) fits the 30-char API limit.
+      val="$(openssl rand -base64 21 | tr -d '\n')"
+      DIFY_INIT_PASSWORD_GENERATED=1
+    else
+      val="$(openssl rand -base64 42 | tr -d '\n')"
+    fi
+  fi
+  sed -i "s|${placeholder}|${val}|g" "$DIFF_TMP"
+done
+sed -i \
+  -e "s|__POSTGRES_USER__|$(sed_escape "$POSTGRES_USER")|g" \
+  -e "s|__POSTGRES_PASSWORD__|$(sed_escape "$POSTGRES_PASSWORD_VAL")|g" \
+  -e "s|__REDIS_PASSWORD__|$(sed_escape "$REDIS_PASSWORD_VAL")|g" \
+  -e "s|__AGENT_DEV_PORT__|$(sed_escape "$AGENT_DEV_PORT_VAL")|g" \
+  "$DIFF_TMP"
+if grep -v '^[[:space:]]*#' "$DIFF_TMP" | grep -q -e '__GEN_' -e '__POSTGRES_USER__' -e '__POSTGRES_PASSWORD__' \
+        -e '__REDIS_PASSWORD__' -e '__AGENT_DEV_PORT__'; then
+  echo "[start] ERROR: unresolved placeholders in $DIFF_TMP; refusing to start the dify stack" >&2
+  rm -f "$DIFF_TMP"
+  exit 1
+fi
+mv "$DIFF_TMP" "$DIFY_ENV"
+if [ "$DIFY_INIT_PASSWORD_GENERATED" = "1" ]; then
+  echo "[start] dify INIT_PASSWORD generated (one-time bootstrap gate); see INIT_PASSWORD in $DIFY_ENV"
+fi
+
+# 4c. start the dify stack (own compose project; interpolation and container
+#     env both come from docker/dify/.env, which doubles as the project env file).
+docker compose -p dify --project-directory "$DIFY_DIR" -f "$DIFY_DIR/docker-compose.yaml" up -d
+
+echo "[start] dify stack is up; console reachable at http://<host>:$AGENT_DEV_PORT_VAL (plain HTTP; open the firewall as needed)"
