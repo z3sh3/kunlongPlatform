@@ -31,13 +31,11 @@ require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/go-webauthn/x v0.3.1 // indirect
 	github.com/goccy/go-json v0.10.6 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
 	github.com/google/go-tpm v0.9.8 // indirect
-	github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e // indirect
 	github.com/grafana/pyroscope-go/godeltaprof v0.1.9 // indirect
 	github.com/hashicorp/go-version v1.8.0 // indirect
 	github.com/icza/bitio v1.1.0 // indirect
@@ -72,6 +70,7 @@ require (
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
+	github.com/tiktoken-go/tokenizer v0.8.1 // indirect
 	github.com/tinylib/msgp v1.6.4 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
@@ -93,11 +92,15 @@ require (
 	modernc.org/sqlite v1.40.1 // indirect
 )
 
+replace github.com/QuantumNous/new-api/relaykit => ./relaykit
+
 require (
 	github.com/Azure/go-ntlmssp v0.1.1
-	github.com/Calcium-Ion/go-epay v0.0.4
+	github.com/Calcium-Ion/go-epay v0.0.5
+	github.com/Calcium-Ion/moejs v0.1.0-alpha.6
 	github.com/ClickHouse/clickhouse-go/v2 v2.46.0
 	github.com/QuantumNous/new-api/relaykit v0.0.0
+	github.com/QuantumNous/new-api/tokenkit v0.0.0
 	github.com/abema/go-mp4 v1.7.3
 	github.com/alicebob/miniredis/v2 v2.38.0
 	github.com/andybalholm/brotli v1.2.5
@@ -128,7 +131,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/grafana/pyroscope-go v1.2.7
-	github.com/grafana/sobek v0.0.0-20260708062710-267a0e055bb4
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/jfreymuth/oggvorbis v1.0.5
 	github.com/jinzhu/copier v0.4.0
@@ -151,7 +153,6 @@ require (
 	github.com/thanhpk/randstr v1.0.6
 	github.com/tidwall/gjson v1.19.0
 	github.com/tidwall/sjson v1.2.5
-	github.com/tiktoken-go/tokenizer v0.8.1
 	github.com/waffo-com/waffo-go v1.3.2
 	github.com/waffo-com/waffo-pancake-sdk-go v0.16.0
 	github.com/yapingcat/gomedia v0.0.0-20240906162731-17feea57090c
@@ -169,4 +170,4 @@ require (
 	gorm.io/gorm v1.31.2
 )
 
-replace github.com/QuantumNous/new-api/relaykit => ./relaykit
+replace github.com/QuantumNous/new-api/tokenkit => ./tokenkit

@@ -1,7 +1,3 @@
-import type { ReactTable } from '@tanstack/react-table'
-import { useTranslation } from 'react-i18next'
-
-import type { DataTableFeatures } from '@/components/data-table/features'
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -20,6 +16,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import type { ReactTable } from '@tanstack/react-table'
+import { useTranslation } from 'react-i18next'
+
+import type { DataTableFeatures } from '@/components/data-table/features'
 import { Combobox } from '@/components/ui/combobox'
 
 import { CompactDateTimeRangePicker } from '../../components/compact-date-time-range-picker'
@@ -58,6 +58,7 @@ export function AuditLogFilterBar(props: {
   scope: 'all' | 'self'
   accessOnly?: boolean
   tokenScope: string
+  defaultTokenScope: string
   currentTokenRef?: string
   onTokenScopeChange: (value: string) => void
   isFetching: boolean
@@ -193,7 +194,7 @@ export function AuditLogFilterBar(props: {
     [
       props.filters.success,
       props.filters.category,
-      props.tokenScope !== 'all',
+      props.tokenScope !== props.defaultTokenScope,
     ].filter(Boolean).length
   const hasFilters =
     filterCount > 0 ||
