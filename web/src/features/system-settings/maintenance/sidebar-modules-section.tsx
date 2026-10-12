@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useEffect, useMemo } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -81,6 +81,10 @@ export function SidebarModulesSection({
       title: t('Admin area'),
       description: t('Global configuration and administrative tools.'),
     },
+    'agent-workshop': {
+      title: t('Agent Workshop'),
+      description: t('Agent marketplace and the Dify agent development console.'),
+    },
   }
 
   const moduleMeta: Record<
@@ -137,6 +141,16 @@ export function SidebarModulesSection({
         description: t('Manage your security settings and account access'),
       },
     },
+    'agent-workshop': {
+      agents: {
+        title: t('Agents'),
+        description: t('Browse and manage user-built agents.'),
+      },
+      agentdev: {
+        title: t('Agent Development'),
+        description: t('Dify agent development console (external service).'),
+      },
+    },
     admin: {
       channel: {
         title: t('Channels'),
@@ -169,6 +183,11 @@ export function SidebarModulesSection({
   const form = useForm<SidebarFormValues>({
     defaultValues: formDefaults,
   })
+
+  // Subscribe to the whole form once at the top level. Inlined form.watch()
+  // calls return unmemoizable getter functions, which React Compiler flags
+  // as incompatible; useWatch keeps the component memoizable.
+  const watchedValues = useWatch({ control: form.control })
 
   useEffect(() => {
     form.reset(formDefaults)
@@ -256,16 +275,17 @@ export function SidebarModulesSection({
                                 {moduleInfo.description}
                               </FormDescription>
                             </SettingsSwitchContent>
-                            <FormControl>
-                              <Switch
-                                checked={Boolean(field.value)}
-                                onCheckedChange={field.onChange}
-                                disabled={
-                                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                  !form.watch(`${sectionKey}.enabled` as any)
-                                }
-                              />
-                            </FormControl>
+                              <FormControl>
+                                <Switch
+                                  checked={Boolean(field.value)}
+                                  onCheckedChange={field.onChange}
+                                  disabled={
+                                    !watchedValues?.[
+                                      sectionKey as keyof SidebarFormValues
+                                    ]?.enabled
+                                  }
+                                />
+                              </FormControl>
                           </SettingsSwitchItem>
                         )}
                       />

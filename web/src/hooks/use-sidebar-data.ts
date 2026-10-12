@@ -18,11 +18,16 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import {
   Activity,
+  Bot,
   Box,
+  BrainCircuit,
+  Building2,
   ClipboardList,
   CreditCard,
+  Database,
   FileText,
   FlaskConical,
+  GraduationCap,
   Key,
   LayoutDashboard,
   ListTodo,
@@ -36,10 +41,12 @@ import {
   User,
   Users,
   Wallet,
+  Workflow,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import type { SidebarData } from '@/components/layout/types'
+import { getAgentDevUrl } from '@/lib/constants'
 import { ROLE } from '@/lib/roles'
 
 /**
@@ -125,6 +132,70 @@ export function useSidebarData(): SidebarData {
             title: t('Security & Access'),
             url: '/security',
             icon: ShieldCheck,
+          },
+        ],
+      },
+      {
+        id: 'data-market',
+        title: t('Data Market'),
+        items: [
+          {
+            title: t('Datasets'),
+            url: '/data-market',
+            icon: Database,
+          },
+        ],
+      },
+      {
+        id: 'model-square',
+        title: t('Model Square'),
+        items: [
+          {
+            title: t('Model Training'),
+            url: '/model-training',
+            icon: BrainCircuit,
+          },
+        ],
+      },
+      {
+        id: 'agent-workshop',
+        title: t('Agent Workshop'),
+        items: [
+          {
+            title: t('Agents'),
+            url: '/agent-workshop',
+            icon: Bot,
+          },
+          {
+            // External Dify console (new tab); url is derived from the current
+            // host + AGENT_DEV_PORT, matching the deployment-side port.
+            // configUrls carries the stable pseudo-key for module toggling.
+            title: t('Agent Development'),
+            url: getAgentDevUrl(),
+            configUrls: ['/agent-dev'],
+            icon: Workflow,
+          },
+        ],
+      },
+      {
+        id: 'talent-training',
+        title: t('Talent Training & Certification'),
+        items: [
+          {
+            title: t('Training & Certification'),
+            url: '/talent-training',
+            icon: GraduationCap,
+          },
+        ],
+      },
+      {
+        id: 'enterprise-incubation',
+        title: t('Enterprise Incubation'),
+        items: [
+          {
+            title: t('Incubation Programs'),
+            url: '/enterprise-incubation',
+            icon: Building2,
           },
         ],
       },

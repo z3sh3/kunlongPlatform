@@ -119,20 +119,34 @@ function NavBadge({ children }: { children: ReactNode }) {
 
 /**
  * Sidebar menu link item
+ *
+ * Absolute http(s) URLs (e.g. the Dify "Agent Development" console) open in
+ * a new tab via a plain anchor; internal routes keep the TanStack Link with
+ * client-side routing and preload.
  */
 function SidebarMenuLink({ item, href }: { item: NavLink; href: string }) {
   const { isMobile, setOpenMobile } = useSidebar()
+  const isExternal = /^https?:\/\//.test(String(item.url))
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        isActive={checkIsActive(href, item)}
+        isActive={!isExternal && checkIsActive(href, item)}
         tooltip={item.title}
         render={
-          <Link
-            to={item.url}
-            preload={isMobile ? false : undefined}
-            onClick={() => setOpenMobile(false)}
-          />
+          isExternal ? (
+            <a
+              href={item.url}
+              target='_blank'
+              rel='noopener noreferrer'
+              onClick={() => setOpenMobile(false)}
+            />
+          ) : (
+            <Link
+              to={item.url}
+              preload={isMobile ? false : undefined}
+              onClick={() => setOpenMobile(false)}
+            />
+          )
         }
       >
         {item.icon && <item.icon className='shrink-0' />}

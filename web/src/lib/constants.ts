@@ -24,6 +24,23 @@ For commercial licensing, please contact support@quantumnous.com
 export const DEFAULT_SYSTEM_NAME = 'New API'
 export const DEFAULT_LOGO = '/logo.png'
 
+// Agent Development (Dify) console port.
+// Keep in sync with AGENT_DEV_PORT in the root .env: start.sh renders it into
+// docker/dify/.env and publishes the dify nginx service on this host port.
+export const AGENT_DEV_PORT = 8081
+
+/**
+ * URL of the external Dify "Agent Development" console.
+ *
+ * The dify stack is deployed beside the main site and exposed on a dedicated
+ * plain-HTTP port (see AGENT_DEV_PORT), so the URL is derived from the host
+ * the user is currently browsing. Returns an empty string outside the browser.
+ */
+export function getAgentDevUrl(): string {
+  if (typeof window === 'undefined') return ''
+  return `http://${window.location.hostname}:${AGENT_DEV_PORT}`
+}
+
 // LocalStorage Keys
 export const STORAGE_KEYS = {
   SYSTEM_NAME: 'system_name',

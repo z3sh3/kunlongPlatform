@@ -186,6 +186,18 @@ export const STATIC_I18N_KEYS = [
   'Docs',
   'About',
 
+  // Console module groups (data market, model training, agent
+  // workshop, talent training, enterprise incubation)
+  'Data Market',
+  'Datasets',
+  'Model Training',
+  'Agent Workshop',
+  'Agents',
+  'Talent Training & Certification',
+  'Training & Certification',
+  'Enterprise Incubation',
+  'Incubation Programs',
+
   // Sidebar views (drill-in workspaces)
   'System Settings',
   'Back to Dashboard',

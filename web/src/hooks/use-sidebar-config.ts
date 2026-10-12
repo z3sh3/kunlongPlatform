@@ -66,6 +66,27 @@ const DEFAULT_SIDEBAR_MODULES: SidebarModulesAdminConfig = {
     setting: true,
     subscription: true,
   },
+  'data-market': {
+    enabled: true,
+    datasets: true,
+  },
+  'model-square': {
+    enabled: true,
+    training: true,
+  },
+  'agent-workshop': {
+    enabled: true,
+    agents: true,
+    agentdev: true,
+  },
+  'talent-training': {
+    enabled: true,
+    courses: true,
+  },
+  'enterprise-incubation': {
+    enabled: true,
+    programs: true,
+  },
 }
 
 const mergeWithDefaultSidebarModules = (
@@ -112,6 +133,17 @@ const URL_TO_CONFIG_MAP: Record<string, { section: string; module: string }> = {
   '/profile': { section: 'personal', module: 'personal' },
   '/security': { section: 'personal', module: 'security' },
   '/channels': { section: 'admin', module: 'channel' },
+  '/data-market': { section: 'data-market', module: 'datasets' },
+  '/model-training': { section: 'model-square', module: 'training' },
+  '/agent-workshop': { section: 'agent-workshop', module: 'agents' },
+  // Pseudo-key used by the external Dify console entry (configUrls) so the
+  // admin/user module toggle can gate an item whose real URL is dynamic.
+  '/agent-dev': { section: 'agent-workshop', module: 'agentdev' },
+  '/talent-training': { section: 'talent-training', module: 'courses' },
+  '/enterprise-incubation': {
+    section: 'enterprise-incubation',
+    module: 'programs',
+  },
   '/models': { section: 'admin', module: 'models' },
   '/models/metadata': { section: 'admin', module: 'models' },
   '/models/deployments': { section: 'admin', module: 'models' },

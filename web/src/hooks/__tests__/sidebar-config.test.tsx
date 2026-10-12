@@ -180,3 +180,28 @@ describe('audit log sidebar entry', () => {
     expect(titles).toContain('Audit Logs')
   })
 })
+
+describe('agent development sidebar entry', () => {
+  it('shows the external Agent Development entry by default with the derived console URL', () => {
+    const { result } = sidebarFor()
+    const group = result.current.find((g) => g.id === 'agent-workshop')
+    const titles = (group?.items ?? []).map((item) => item.title)
+    expect(titles).toContain('Agents')
+    expect(titles).toContain('Agent Development')
+    // External Dify console URL: current host + the deployment-side port.
+    const agentDev = (group?.items ?? []).find(
+      (item) => item.title === 'Agent Development'
+    )
+    expect(agentDev?.url).toBe('http://localhost:8081')
+  })
+
+  it('hides only the Agent Development entry when the agentdev module is toggled off', () => {
+    const { result } = sidebarFor({
+      'agent-workshop': { enabled: true, agents: true, agentdev: false },
+    })
+    const group = result.current.find((g) => g.id === 'agent-workshop')
+    const titles = (group?.items ?? []).map((item) => item.title)
+    expect(titles).toContain('Agents')
+    expect(titles).not.toContain('Agent Development')
+  })
+})
