@@ -24,6 +24,7 @@ import {
   type ExpandedState,
   type OnChangeFn,
   type PaginationState,
+  type ReactTable,
   type RowSelectionState,
   type RowData,
   type SortingState,
@@ -498,7 +499,24 @@ export function useDataTable<TData extends RowData>(
     onPaginationChange,
   })
 
-  const actualPageCount = table.getPageCount()
+  // v9 rebuilds the value returned by `useTable` whenever the options literal
+  // or any state slice changes, so its identity differs on nearly every
+  // render. v8 handed back one stable instance and the tables built on this
+  // hook rely on that: `table` appears in effect dependency arrays, and an
+  // effect that calls a `table.set*`/`reset*` method re-fires on each identity
+  // change, which updates state, which changes the identity again.
+  // Keep one handle per mount and sync it with the freshly built instance.
+  const tableHandleRef = React.useRef<
+    ReactTable<DataTableFeatures, TData> | undefined
+  >(undefined)
+  if (tableHandleRef.current === undefined) {
+    tableHandleRef.current = { ...table }
+  } else {
+    Object.assign(tableHandleRef.current, table)
+  }
+  const stableTable = tableHandleRef.current
+
+  const actualPageCount = stableTable.getPageCount()
   React.useEffect(() => {
     ensurePageInRange?.(actualPageCount)
   }, [actualPageCount, ensurePageInRange])
@@ -592,6 +610,6 @@ export function useDataTable<TData extends RowData>(
   }, [columnSizing, columnSizingStorageKey])
 
   return {
-    table,
+    table: stableTable,
   }
 }
