@@ -19,21 +19,12 @@ For commercial licensing, please contact support@quantumnous.com
 import { useTranslation } from 'react-i18next'
 
 import { SectionPageLayout } from '@/components/layout'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs'
-import { ROLE } from '@/lib/roles'
-import { useAuthStore } from '@/stores/auth-store'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import { AgentsList } from './components/agents-list'
+import { DifyAgentsList } from './components/dify-agents-list'
 
 export function AgentWorkshop() {
   const { t } = useTranslation()
-  const user = useAuthStore((s) => s.auth.user)
-  const isAdmin = (user?.role ?? 0) >= ROLE.ADMIN
 
   return (
     <SectionPageLayout fixedContent>
@@ -41,25 +32,19 @@ export function AgentWorkshop() {
         {t('Agent Workshop')}
       </SectionPageLayout.Title>
       <SectionPageLayout.Content>
+        {/* Agents are created and maintained in Dify, which is the single
+            source of truth; this page only reads them. */}
         <Tabs defaultValue='browse'>
           <TabsList className='flex-wrap'>
             <TabsTrigger value='browse'>{t('Browse agents')}</TabsTrigger>
             <TabsTrigger value='mine'>{t('My agents')}</TabsTrigger>
-            {isAdmin ? (
-              <TabsTrigger value='admin'>{t('Administration')}</TabsTrigger>
-            ) : null}
           </TabsList>
           <TabsContent value='browse' className='mt-4'>
-            <AgentsList mode='browse' />
+            <DifyAgentsList mode='browse' />
           </TabsContent>
           <TabsContent value='mine' className='mt-4'>
-            <AgentsList mode='mine' />
+            <DifyAgentsList mode='mine' />
           </TabsContent>
-          {isAdmin ? (
-            <TabsContent value='admin' className='mt-4'>
-              <AgentsList mode='admin' />
-            </TabsContent>
-          ) : null}
         </Tabs>
       </SectionPageLayout.Content>
     </SectionPageLayout>

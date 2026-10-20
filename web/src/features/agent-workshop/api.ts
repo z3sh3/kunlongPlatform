@@ -20,87 +20,50 @@ import { api } from '@/lib/api'
 import { requireServerSuccess } from '@/lib/server-error-message'
 
 import type {
-  Agent,
-  AgentFormData,
   ApiResponse,
-  ListParams,
-  PagedData,
+  DifyAgentAccess,
+  DifyAgentListParams,
+  DifyAgentsPage,
 } from './types'
 
 const BASE_URL = '/api/agent-workshop'
 
-function buildQuery(params: ListParams): string {
+function buildQuery(params: DifyAgentListParams): string {
   const query = new URLSearchParams()
   query.set('p', String(params.p ?? 1))
   query.set('page_size', String(params.page_size ?? 10))
   if (params.keyword) query.set('keyword', params.keyword)
-  if (params.status !== undefined) {
-    query.set('status', String(params.status))
-  }
+  if (params.mode && params.mode !== 'all') query.set('mode', params.mode)
   if (params.mine) query.set('mine', '1')
   return query.toString()
 }
 
-export async function listAgents(
-  params: ListParams
-): Promise<PagedData<Agent>> {
-  const res = await api.get(`${BASE_URL}/agents?${buildQuery(params)}`)
-  return requireServerSuccess<ApiResponse<PagedData<Agent>>>(res.data).data
+/** Lists the agents of the connected Dify workspace; Dify is the only source. */
+export async function listDifyAgents(
+  params: DifyAgentListParams
+): Promise<DifyAgentsPage> {
+  const res = await api.get(
+    `${BASE_URL}/dify/agents?${buildQuery(params)}`
+  )
+  return requireServerSuccess<ApiResponse<DifyAgentsPage>>(res.data).data
 }
 
-export async function getAgent(id: number): Promise<Agent> {
-  const res = await api.get(`${BASE_URL}/agents/${id}`)
-  return requireServerSuccess<ApiResponse<Agent>>(res.data).data
+/** Explains how one agent can be reached (web app, service API, console). */
+export async function getDifyAgentAccess(
+  id: string
+): Promise<DifyAgentAccess> {
+  const res = await api.get(`${BASE_URL}/dify/agents/${id}/access`)
+  return requireServerSuccess<ApiResponse<DifyAgentAccess>>(res.data).data
 }
 
-export async function createAgent(data: AgentFormData): Promise<Agent> {
-  const res = await api.post(`${BASE_URL}/agents`, data)
-  return requireServerSuccess<ApiResponse<Agent>>(res.data).data
-}
 
-export async function updateAgent(
-  id: number,
-  data: AgentFormData
-): Promise<void> {
-  const res = await api.put(`${BASE_URL}/agents/${id}`, data)
-  requireServerSuccess(res.data)
-}
-
-export async function deleteAgent(id: number): Promise<void> {
-  const res = await api.delete(`${BASE_URL}/agents/${id}`)
-  requireServerSuccess(res.data)
-}
-
-export async function submitAgent(id: number): Promise<void> {
-  const res = await api.post(`${BASE_URL}/agents/${id}/submit`)
-  requireServerSuccess(res.data)
-}
-
-export async function adminListAgents(
-  params: ListParams
-): Promise<PagedData<Agent>> {
-  const res = await api.get(`${BASE_URL}/admin/agents?${buildQuery(params)}`)
-  return requireServerSuccess<ApiResponse<PagedData<Agent>>>(res.data).data
-}
-
-export async function adminReviewAgent(
-  id: number,
-  approve: boolean,
-  comment = ''
-): Promise<void> {
-  const res = await api.put(`${BASE_URL}/admin/agents/${id}/review`, {
-    approve,
-    comment,
-  })
-  requireServerSuccess(res.data)
-}
-
-export async function adminSetAgentOffline(
-  id: number,
-  offline: boolean
-): Promise<void> {
-  const res = await api.put(`${BASE_URL}/admin/agents/${id}/offline`, {
-    offline,
-  })
-  requireServerSuccess(res.data)
+/**
+ * True when the console has no usable Dify connection configured. The list
+ * request then fails with a stable error code, which lets the page explain the
+ * state instead of showing a generic failure.
+ */
+export function isDifyNotConfigured(error: unknown): boolean {
+  const cause = (error as { cause?: unknown } | null | undefined)?.cause
+  if (!cause || typeof cause !== 'object') return false
+  return (cause as { code?: unknown }).code === 'dify_not_configured'
 }

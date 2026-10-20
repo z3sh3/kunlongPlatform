@@ -16,30 +16,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-export type Agent = {
-  id: number
-  user_id: number
+export type DifyAgent = {
+  id: string
   name: string
   description: string
+  /** Dify app mode, e.g. chat, advanced-chat, agent, workflow. */
+  mode: string
+  icon_type: string
   icon: string
-  category: string
-  config: string
-  price_mode: number
-  unit_price: number
-  status: number
-  review_comment: string
+  icon_background: string
   created_at: string
   updated_at: string
-}
-
-export type AgentFormData = {
-  name: string
-  description: string
-  icon: string
-  category: string
-  config: string
-  price_mode: number
-  unit_price: number
+  /** Console deep link for the app, relative to console_base_url. */
+  console_path: string
 }
 
 export type ApiResponse<T = unknown> = {
@@ -48,17 +37,30 @@ export type ApiResponse<T = unknown> = {
   data: T
 }
 
-export type PagedData<T> = {
+export type DifyAgentsPage = {
   page: number
   page_size: number
   total: number
-  items: T[]
+  items: DifyAgent[]
+  /** Public origin of the Dify console; empty when the admin left it blank. */
+  console_base_url: string
 }
 
-export type ListParams = {
+export type DifyAgentListParams = {
   p?: number
   page_size?: number
   keyword?: string
-  status?: number
+  mode?: string
   mine?: boolean
+}
+
+export type DifyAgentAccess = {
+  name: string
+  mode: string
+  /** Published web-app URL; empty when site access is off or unpublished. */
+  webapp_url: string
+  /** Service API base URL; empty when API access is off. */
+  api_base_url: string
+  /** Console deep link relative to the console origin. */
+  console_path: string
 }
