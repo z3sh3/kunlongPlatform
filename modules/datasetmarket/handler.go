@@ -227,7 +227,12 @@ func ApplyDataset(c *gin.Context) {
 		common.ApiErrorMsg(c, "already applied for this dataset")
 		return
 	}
-	grant := DatasetGrant{DatasetId: dataset.Id, UserId: userId}
+	accessKey, keyErr := issueAccessKey()
+	if keyErr != nil {
+		common.ApiError(c, keyErr)
+		return
+	}
+	grant := DatasetGrant{DatasetId: dataset.Id, UserId: userId, AccessKey: accessKey}
 	if dataset.PriceMode == shared.PriceModeFree {
 		grant.Status = shared.ReviewStatusApproved
 	} else {
@@ -258,6 +263,11 @@ func ListMyGrants(c *gin.Context) {
 		Find(&grants).Error; err != nil {
 		common.ApiError(c, err)
 		return
+	}
+	for index := range grants {
+		if grants[index].Status == shared.ReviewStatusApproved {
+			grants[index].AccessUrl = grantAccessURL(c, grants[index].AccessKey)
+		}
 	}
 	pageInfo.SetTotal(int(total))
 	pageInfo.SetItems(grants)
@@ -369,6 +379,14 @@ func AdminReviewGrant(c *gin.Context) {
 	if grant.Status != shared.ReviewStatusPending {
 		common.ApiErrorMsg(c, "grant has already been reviewed")
 		return
+	}
+	// Older grants may predate access keys; make sure an approved grant can be
+	// used through its URL.
+	if req.Status == shared.ReviewStatusApproved {
+		if err := ensureGrantAccessKey(&grant); err != nil {
+			common.ApiError(c, err)
+			return
+		}
 	}
 	updates := map[string]any{
 		"status":     req.Status,

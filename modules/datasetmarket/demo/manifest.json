@@ -1,0 +1,32 @@
+[
+  {
+    "key": "domain-knowledge",
+    "file": "domain-knowledge.jsonl",
+    "name": "演示数据集：医疗健康领域问答（领域知识维度）",
+    "description": "24 条中文医疗健康咨询问答，覆盖症状判断、用药常识、体检指标解读与就医建议。维度侧重「领域专业知识」：可作为领域知识注入与客服问答微调语料，也可作为 DataFlow 清洗与评估的输入。",
+    "category": "domain-knowledge",
+    "tags": "领域知识,医疗健康,中文问答,单轮",
+    "rows": 24,
+    "size_bytes": 7295
+  },
+  {
+    "key": "code-tool-calling",
+    "file": "code-tool-calling.jsonl",
+    "name": "演示数据集：Python 函数实现与工具调用（代码维度）",
+    "description": "24 条「自然语言需求 → 可运行 Python 实现」，覆盖数据处理、重试、限流、校验与解析等常见工具函数。维度侧重「代码与函数调用能力」：适合代码生成微调与工具调用训练。",
+    "category": "code",
+    "tags": "代码生成,函数调用,Python,工具使用",
+    "rows": 25,
+    "size_bytes": 8628
+  },
+  {
+    "key": "math-reasoning",
+    "file": "math-reasoning.jsonl",
+    "name": "演示数据集：数学应用题分步推理（推理维度）",
+    "description": "24 道中文数学应用题，input 字段给出分步推导、output 字段给出最终答案。维度侧重「多步推理与计算」：适合推理能力微调，也可直接用于推理增强流水线。",
+    "category": "reasoning",
+    "tags": "数学推理,思维链,应用题,中文",
+    "rows": 24,
+    "size_bytes": 3814
+  }
+]

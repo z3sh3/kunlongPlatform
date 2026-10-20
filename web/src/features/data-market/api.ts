@@ -20,6 +20,7 @@ import { api } from '@/lib/api'
 import { requireServerSuccess } from '@/lib/server-error-message'
 
 import type {
+  DatasetPreview,
   ApiResponse,
   Dataset,
   DatasetFormData,
@@ -68,6 +69,11 @@ export async function updateDataset(
 export async function deleteDataset(id: number): Promise<void> {
   const res = await api.delete(`${BASE_URL}/datasets/${id}`)
   requireServerSuccess(res.data)
+}
+
+export async function previewDataset(id: number): Promise<DatasetPreview> {
+  const res = await api.get(`${BASE_URL}/datasets/${id}/preview`)
+  return requireServerSuccess<ApiResponse<DatasetPreview>>(res.data).data
 }
 
 export async function applyDataset(id: number): Promise<DatasetGrant> {

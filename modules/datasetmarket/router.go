@@ -23,11 +23,21 @@ func RegisterRoutes(rg *gin.RouterGroup) {
 func registerRoutes(rg *gin.RouterGroup, userAuth, adminAuth gin.HandlerFunc) {
 	group := rg.Group("/data-market")
 	{
+		// Bundled demo file download. Public on purpose: the training service
+		// fetches marketplace listings by URL and has no console session. Only
+		// exact keys from the embedded manifest are served.
+		group.GET("/demo-datasets/:key/file", ServeDemoDatasetFile)
+
+		// Access-key download. Public for the same reason: the key itself is the
+		// credential, so a training job can fetch the data without a session.
+		group.GET("/access/:key/file", ServeGrantFile)
+
 		user := group.Group("")
 		user.Use(userAuth)
 		{
 			user.GET("/datasets", ListDatasets)
 			user.GET("/datasets/:id", GetDataset)
+			user.GET("/datasets/:id/preview", PreviewDataset)
 			user.POST("/datasets", CreateDataset)
 			user.PUT("/datasets/:id", UpdateDataset)
 			user.DELETE("/datasets/:id", DeleteDataset)
@@ -41,6 +51,8 @@ func registerRoutes(rg *gin.RouterGroup, userAuth, adminAuth gin.HandlerFunc) {
 			admin.GET("/grants", AdminListGrants)
 			admin.PUT("/datasets/:id/status", AdminUpdateDatasetStatus)
 			admin.PUT("/grants/:id/review", AdminReviewGrant)
+			admin.GET("/demo-datasets", ListDemoDatasets)
+			admin.POST("/demo-datasets", SeedDemoDatasets)
 		}
 	}
 }

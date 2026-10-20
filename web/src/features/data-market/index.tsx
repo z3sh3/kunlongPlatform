@@ -16,15 +16,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 import { SectionPageLayout } from '@/components/layout'
+import { Button } from '@/components/ui/button'
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs'
+import { api } from '@/lib/api'
 import { ROLE } from '@/lib/roles'
 import { useAuthStore } from '@/stores/auth-store'
 
@@ -36,6 +40,39 @@ export function DataMarket() {
   const { t } = useTranslation()
   const user = useAuthStore((s) => s.auth.user)
   const isAdmin = (user?.role ?? 0) >= ROLE.ADMIN
+  const queryClient = useQueryClient()
+
+  // Publishes the three bundled demonstration listings (domain knowledge, code,
+  // reasoning). Idempotent: existing listings are reported, not duplicated.
+  const seedMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.post('/api/data-market/admin/demo-datasets')
+      const payload = res.data as {
+        success: boolean
+        message?: string
+        data?: { created?: unknown[]; existing?: unknown[] }
+      }
+      if (!payload?.success) {
+        throw new Error(payload?.message || 'Request failed')
+      }
+      return {
+        created: payload.data?.created?.length ?? 0,
+        existing: payload.data?.existing?.length ?? 0,
+      }
+    },
+    onSuccess: (result) => {
+      if (result.created > 0) {
+        toast.success(
+          t('Published {{count}} demo dataset(s)', { count: result.created })
+        )
+      } else {
+        toast.info(t('Demo datasets already exist'))
+      }
+      queryClient.invalidateQueries({ queryKey: ['data-market'] })
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : t('Request failed')),
+  })
 
   return (
     <SectionPageLayout fixedContent>
@@ -50,7 +87,23 @@ export function DataMarket() {
               <TabsTrigger value='admin'>{t('Administration')}</TabsTrigger>
             ) : null}
           </TabsList>
-          <TabsContent value='browse' className='mt-4'>
+          <TabsContent value='browse' className='mt-4 space-y-3'>
+            {isAdmin ? (
+              <div className='flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3'>
+                <p className='text-muted-foreground text-xs'>
+                  {t(
+                    'Demo datasets cover three dimensions: domain knowledge, code and reasoning.'
+                  )}
+                </p>
+                <Button
+                  variant='outline'
+                  disabled={seedMutation.isPending}
+                  onClick={() => seedMutation.mutate()}
+                >
+                  {t('Generate demo datasets')}
+                </Button>
+              </div>
+            ) : null}
             <DatasetsList mode='browse' />
           </TabsContent>
           <TabsContent value='mine' className='mt-4'>

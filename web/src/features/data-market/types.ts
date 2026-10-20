@@ -43,7 +43,21 @@ export type DatasetGrant = {
   remark: string
   created_at: string
   updated_at: string
+  /** Credential for the access URL; only usable once approved. */
+  access_key: string
+  /** Download URL derived by the backend for approved grants. */
+  access_url: string
   dataset: Dataset
+}
+
+/** First rows of a dataset, used by the preview dialog. */
+export type DatasetPreview = {
+  available: boolean
+  reason?: string
+  columns: string[]
+  rows: Array<Record<string, unknown>>
+  total_rows: number
+  truncated: boolean
 }
 
 export type DatasetFormData = {

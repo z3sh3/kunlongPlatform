@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { ServerPagination, StaticDataTable } from '@/components/data-table'
+import { DatasetPreviewButton } from './dataset-preview-button'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { handleServerError } from '@/lib/handle-server-error'
@@ -188,6 +189,7 @@ export function DatasetsList(props: DatasetsListProps) {
       className: 'text-right',
       cell: (dataset: Dataset) => (
         <div className='flex justify-end gap-1'>
+          <DatasetPreviewButton dataset={dataset} />
           {props.mode === 'browse' ? (
             <Button
               size='sm'

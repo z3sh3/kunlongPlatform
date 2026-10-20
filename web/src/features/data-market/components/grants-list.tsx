@@ -21,6 +21,7 @@ import dayjs from 'dayjs'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { CopyButton } from '@/components/copy-button'
 import { ServerPagination, StaticDataTable } from '@/components/data-table'
 import { Badge } from '@/components/ui/badge'
 
@@ -68,6 +69,23 @@ export function GrantsList() {
       id: 'remark',
       header: t('Remark'),
       cell: (grant: (typeof items)[number]) => grant.remark || '-',
+    },
+    {
+      id: 'access',
+      header: t('API access'),
+      cell: (grant: (typeof items)[number]) =>
+        grant.access_url ? (
+          <div className='flex items-center gap-1'>
+            <code className='max-w-[240px] truncate text-xs'>
+              {grant.access_url}
+            </code>
+            <CopyButton value={grant.access_url} tooltip={t('Copy API URL')} />
+          </div>
+        ) : (
+          <span className='text-muted-foreground text-xs'>
+            {t('Available after approval')}
+          </span>
+        ),
     },
     {
       id: 'created_at',
