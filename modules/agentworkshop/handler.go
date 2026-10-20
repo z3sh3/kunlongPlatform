@@ -2,7 +2,9 @@ package agentworkshop
 
 import (
 	"errors"
+	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/model"
@@ -296,6 +298,136 @@ func AdminSetAgentOffline(c *gin.Context) {
 		return
 	}
 	common.ApiSuccess(c, nil)
+}
+
+// difyAgentsResponse is the paginated app list plus the public console origin
+// the UI needs to build its "open in Dify" links.
+type difyAgentsResponse struct {
+	*common.PageInfo
+	ConsoleBaseURL string `json:"console_base_url"`
+}
+
+// ListDifyAgents returns the Dify applications of the configured workspace.
+// Dify is the single source of truth for agents, so nothing is stored locally.
+func ListDifyAgents(c *gin.Context) {
+	client, err := newDifyClient()
+	if err != nil {
+		writeDifyError(c, err)
+		return
+	}
+
+	mode := c.Query("mode")
+	if !difyModeFilterAllowed(mode) {
+		common.ApiErrorT(c, "Unsupported agent type filter")
+		return
+	}
+
+	pageInfo := common.GetPageQuery(c)
+	pageInfo.Page = max(pageInfo.Page, 1)
+	pageInfo.PageSize = min(max(pageInfo.PageSize, 1), difyMaxPageSize)
+
+	page, err := client.listApps(c.Request.Context(), difyAppQuery{
+		Page:  pageInfo.Page,
+		Limit: pageInfo.PageSize,
+		Mode:  mode,
+		Name:  c.Query("keyword"),
+		Mine:  c.Query("mine") == "1",
+	})
+	if err != nil {
+		writeDifyError(c, err)
+		return
+	}
+
+	pageInfo.SetTotal(page.Total)
+	pageInfo.SetItems(page.Items)
+	common.ApiSuccess(c, difyAgentsResponse{
+		PageInfo:       pageInfo,
+		ConsoleBaseURL: client.cfg.ConsoleURL,
+	})
+}
+
+// difyTestRequest carries optional unsaved form values from the settings
+// page. Every field is optional; blank fields keep the saved value.
+type difyTestRequest struct {
+	BaseURL  string `json:"base_url"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+// CheckDifyConnection verifies the configured account can list applications.
+// The optional body lets the settings page test the form values before
+// saving them, so a freshly typed configuration works immediately.
+func CheckDifyConnection(c *gin.Context) {
+	var req difyTestRequest
+	if c.Request != nil && c.Request.Body != nil && c.Request.ContentLength != 0 {
+		if err := c.ShouldBindJSON(&req); err != nil {
+			common.ApiError(c, err)
+			return
+		}
+	}
+	client, err := newDifyTestClient(req.BaseURL, req.Email, req.Password)
+	if err != nil {
+		writeDifyError(c, err)
+		return
+	}
+	classicTotal, agentTotal, err := client.countApps(c.Request.Context())
+	if err != nil {
+		writeDifyError(c, err)
+		return
+	}
+	// The count covers both Dify sources: classic apps plus the Agent product.
+	common.ApiSuccess(c, gin.H{
+		"total":          classicTotal + agentTotal,
+		"email":          client.cfg.Email,
+		"console_url_ok": client.probeConsoleURL(c.Request.Context()),
+	})
+}
+
+// GetDifyAgentAccess explains how one agent can be reached: the published
+// web app, the service API, and the Dify console entry.
+func GetDifyAgentAccess(c *gin.Context) {
+	appID := c.Param("id")
+	if !difyAppIDAllowed(appID) {
+		common.ApiErrorT(c, "Invalid agent id")
+		return
+	}
+	client, err := newDifyClient()
+	if err != nil {
+		writeDifyError(c, err)
+		return
+	}
+	access, err := client.fetchAppAccess(c.Request.Context(), appID)
+	if err != nil {
+		writeDifyError(c, err)
+		return
+	}
+	common.ApiSuccess(c, access)
+}
+
+// difyAppIDAllowed guards the Dify app id before it is embedded in the
+// upstream request path: Dify ids are UUID-shaped.
+func difyAppIDAllowed(appID string) bool {
+	if appID == "" || len(appID) > 64 {
+		return false
+	}
+	// The id must contain no rune outside the UUID alphabet.
+	return !strings.ContainsFunc(appID, func(r rune) bool {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9', r == '-':
+			return false
+		default:
+			return true
+		}
+	})
+}
+
+func writeDifyError(c *gin.Context, err error) {
+	var difyErr *difyError
+	if errors.As(err, &difyErr) {
+		common.ApiErrorStatus(c, http.StatusOK, common.NewMessage(difyErr.Error()), gin.H{"code": difyErr.code})
+		return
+	}
+	common.ApiError(c, err)
 }
 
 func loadOwnedAgent(c *gin.Context) (Agent, bool) {

@@ -219,12 +219,31 @@ for pair in \
       # carrying them over (harmless: the gate is single-use).
       if [ "${#val}" -gt 30 ]; then val=""; fi
       ;;
+    DIFY_AGENT_SERVER_SECRET_KEY)
+      # The agent backend derives its JWE root key from this value and its
+      # settings only accept unpadded base64url (dify_agent server settings,
+      # decode_server_secret_key). Values rendered by older versions of
+      # this script used standard base64 and crash-loop agent_backend, so
+      # regenerate them. Rotation only invalidates in-flight agent-stub
+      # bearer tokens.
+      if ! printf '%s' "$val" | grep -qE '^[A-Za-z0-9_-]+$'; then
+        if [ -n "$val" ]; then
+          echo "[start] regenerating invalid DIFY_AGENT_SERVER_SECRET_KEY (must be unpadded base64url)"
+        fi
+        val=""
+      fi
+      ;;
   esac
   if [ -z "$val" ]; then
     if [ "$dify_key" = "INIT_PASSWORD" ]; then
       # 28 base64 chars (21 bytes, no padding) fits the 30-char API limit.
       val="$(openssl rand -base64 21 | tr -d '\n')"
       DIFY_INIT_PASSWORD_GENERATED=1
+    elif [ "$dify_key" = "DIFY_AGENT_SERVER_SECRET_KEY" ]; then
+      # Exactly 32 bytes as unpadded base64url (43 chars): the agent
+      # backend rejects the +, / and = of standard base64 and any decoded
+      # length other than 32.
+      val="$(openssl rand -base64 32 | tr '+/' '-_' | tr -d '=\n')"
     else
       val="$(openssl rand -base64 42 | tr -d '\n')"
     fi
@@ -253,3 +272,10 @@ fi
 docker compose -p dify --project-directory "$DIFY_DIR" -f "$DIFY_DIR/docker-compose.yaml" up -d
 
 echo "[start] dify stack is up; console reachable at http://<host>:$AGENT_DEV_PORT_VAL (plain HTTP; open the firewall as needed)"
+# The console reads Dify agents through the Dify console API, so it needs an
+# account that can see the workspace apps. Both addresses are console options
+# (System settings -> Operations -> Dify Agent Service), not env vars.
+echo "[start] to show Dify agents in the Agent Workshop, set in System settings -> Operations -> Dify Agent Service:"
+echo "[start]   Dify API Base URL = http://dify-api:5001"
+echo "[start]   Dify Console URL  = http://<host>:$AGENT_DEV_PORT_VAL"
+echo "[start]   plus the email and password of a Dify console account"

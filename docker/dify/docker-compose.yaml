@@ -28,6 +28,10 @@
 #      registry cr.weaviate.io, and expose it via ${WEAVIATE_IMAGE} so
 #      deployments can override the reference (CN mirrors only proxy
 #      docker.io; cr.weaviate.io is unreachable there).
+#   7. Give the `api` service the explicit `newapi_default` alias
+#      `dify-api`; the new-api backend reaches the console API at
+#      http://dify-api:5001 (DifyAPIBaseURL option) instead of relying on
+#      the generic `api` alias.
 # ==================================================================
 
 # Shared configuration using YAML anchors and env_file
@@ -286,9 +290,13 @@ services:
       retries: 3
       start_period: 30s
     networks:
-      - ssrf_proxy_network
-      - default
-      - newapi_default
+      ssrf_proxy_network: null
+      default: null
+      # newapi patch: the new-api backend calls /console/api through this
+      # alias (see the DifyAPIBaseURL option).
+      newapi_default:
+        aliases:
+          - dify-api
 
   # WebSocket service for workflow collaboration.
   api_websocket:

@@ -33,12 +33,23 @@ func registerRoutes(rg *gin.RouterGroup, userAuth, adminAuth gin.HandlerFunc) {
 			user.DELETE("/:id", DeleteAgent)
 			user.POST("/:id/submit", SubmitAgent)
 		}
+		dify := group.Group("/dify")
+		dify.Use(userAuth)
+		{
+			dify.GET("/agents", ListDifyAgents)
+			dify.GET("/agents/:id/access", GetDifyAgentAccess)
+		}
 		admin := group.Group("/admin/agents")
 		admin.Use(adminAuth)
 		{
 			admin.GET("", AdminListAgents)
 			admin.PUT("/:id/review", AdminReviewAgent)
 			admin.PUT("/:id/offline", AdminSetAgentOffline)
+		}
+		difyAdmin := group.Group("/admin/dify")
+		difyAdmin.Use(adminAuth)
+		{
+			difyAdmin.POST("/test", CheckDifyConnection)
 		}
 	}
 }
