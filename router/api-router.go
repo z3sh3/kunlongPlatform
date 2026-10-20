@@ -209,6 +209,17 @@ func SetApiRouter(router *gin.Engine) {
 		apiRouter.GET("/subscription/epay/notify", controller.SubscriptionEpayNotify)
 		apiRouter.GET("/subscription/epay/return", controller.SubscriptionEpayReturn)
 		apiRouter.POST("/subscription/epay/return", anonymousRequestBodyLimit, controller.SubscriptionEpayReturn)
+		storageRoute := apiRouter.Group("/storage")
+		{
+			storageRoute.POST("/upload", middleware.UserAuth(), controller.UploadMedia)
+			storageAdminRoute := storageRoute.Group("/admin")
+			storageAdminRoute.Use(middleware.RootAuth())
+			{
+				storageAdminRoute.GET("/config", controller.GetObjectStorageConfig)
+				storageAdminRoute.POST("/test", controller.VerifyObjectStorage)
+			}
+		}
+
 		optionRoute := apiRouter.Group("/option")
 		optionRoute.Use(middleware.RootAuth())
 		{
