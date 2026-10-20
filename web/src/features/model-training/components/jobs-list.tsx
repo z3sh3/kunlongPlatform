@@ -50,6 +50,7 @@ import {
   getOptionLabelKey,
 } from '../constants'
 import type { FinetuneJob } from '../types'
+import { JobDetailDrawer } from './job-detail-drawer'
 import { JobFormDialog } from './job-form-dialog'
 
 type JobsListMode = 'mine' | 'admin'
@@ -65,6 +66,7 @@ export function JobsList(props: JobsListProps) {
   const [pageSize, setPageSize] = useState(10)
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<FinetuneJob | null>(null)
+  const [detail, setDetail] = useState<FinetuneJob | null>(null)
   const [statusDraft, setStatusDraft] = useState<{
     id: number
     status: number
@@ -224,6 +226,11 @@ export function JobsList(props: JobsListProps) {
         job.result_model || (job.error_msg ? job.error_msg : '-'),
     },
     {
+      id: 'progress',
+      header: t('Progress'),
+      cell: (job: FinetuneJob) => (job.progress > 0 ? `${job.progress}%` : '-'),
+    },
+    {
       id: 'created_at',
       header: t('Created'),
       cell: (job: FinetuneJob) =>
@@ -235,6 +242,9 @@ export function JobsList(props: JobsListProps) {
       className: 'text-right',
       cell: (job: FinetuneJob) => (
         <div className='flex justify-end gap-1'>
+          <Button variant='ghost' size='sm' onClick={() => setDetail(job)}>
+            {t('Details')}
+          </Button>
           {isAdmin ? (
             <div className='flex items-center justify-end gap-1'>
               <Select
@@ -327,6 +337,13 @@ export function JobsList(props: JobsListProps) {
         open={formOpen}
         onOpenChange={setFormOpen}
         job={editing}
+      />
+      <JobDetailDrawer
+        job={detail}
+        open={detail !== null}
+        onOpenChange={(open) => {
+          if (!open) setDetail(null)
+        }}
       />
     </div>
   )

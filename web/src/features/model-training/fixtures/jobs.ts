@@ -21,10 +21,19 @@ import type { FinetuneJob } from '../types'
 
 const base = {
   user_id: 2,
+  dataset_id: 0,
   dataset_refs: '',
   hyper_params: '',
   result_model: '',
   error_msg: '',
+  dataflow_template: '',
+  dataflow_params: '',
+  service_job_id: '',
+  progress: 0,
+  output_dir: '',
+  usage: '',
+  started_at: 0,
+  finished_at: 0,
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
 }

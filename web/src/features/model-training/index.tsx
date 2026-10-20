@@ -19,15 +19,12 @@ For commercial licensing, please contact support@quantumnous.com
 import { useTranslation } from 'react-i18next'
 
 import { SectionPageLayout } from '@/components/layout'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ROLE } from '@/lib/roles'
 import { useAuthStore } from '@/stores/auth-store'
 
+import { ArtifactsPanel } from './components/artifacts-panel'
+import { DatasetsPanel } from './components/datasets-panel'
 import { JobsList } from './components/jobs-list'
 
 export function ModelTraining() {
@@ -37,19 +34,25 @@ export function ModelTraining() {
 
   return (
     <SectionPageLayout fixedContent>
-      <SectionPageLayout.Title>
-        {t('Model Training')}
-      </SectionPageLayout.Title>
+      <SectionPageLayout.Title>{t('Model Training')}</SectionPageLayout.Title>
       <SectionPageLayout.Content>
-        <Tabs defaultValue='mine'>
+        <Tabs defaultValue='jobs'>
           <TabsList className='flex-wrap'>
-            <TabsTrigger value='mine'>{t('My jobs')}</TabsTrigger>
+            <TabsTrigger value='jobs'>{t('My jobs')}</TabsTrigger>
+            <TabsTrigger value='datasets'>{t('Data preparation')}</TabsTrigger>
+            <TabsTrigger value='artifacts'>{t('Model assets')}</TabsTrigger>
             {isAdmin ? (
               <TabsTrigger value='admin'>{t('All jobs')}</TabsTrigger>
             ) : null}
           </TabsList>
-          <TabsContent value='mine' className='mt-4'>
+          <TabsContent value='jobs' className='mt-4'>
             <JobsList mode='mine' />
+          </TabsContent>
+          <TabsContent value='datasets' className='mt-4'>
+            <DatasetsPanel />
+          </TabsContent>
+          <TabsContent value='artifacts' className='mt-4'>
+            <ArtifactsPanel />
           </TabsContent>
           {isAdmin ? (
             <TabsContent value='admin' className='mt-4'>

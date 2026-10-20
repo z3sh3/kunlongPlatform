@@ -22,11 +22,20 @@ export type FinetuneJob = {
   name: string
   base_model: string
   method: string
+  dataset_id: number
   dataset_refs: string
   hyper_params: string
   status: number
   result_model: string
   error_msg: string
+  dataflow_template: string
+  dataflow_params: string
+  service_job_id: string
+  progress: number
+  output_dir: string
+  usage: string
+  started_at: number
+  finished_at: number
   created_at: string
   updated_at: string
 }
@@ -35,8 +44,117 @@ export type FinetuneJobFormData = {
   name: string
   base_model: string
   method: string
-  dataset_refs: string
+  dataset_id: number
   hyper_params: string
+}
+
+export type TrainingDataset = {
+  id: number
+  user_id: number
+  name: string
+  source: string
+  source_ref: string
+  format: string
+  size_bytes: number
+  rows: number
+  status: number
+  error_msg: string
+  remote_id: string
+  prepared: boolean
+  prepared_ref: string
+  pipeline: string
+  pipeline_params: string
+  prepare_run_id: string
+  prepare_status: number
+  prepare_error: string
+  created_at: string
+  updated_at: string
+}
+
+export type TrainedModel = {
+  id: number
+  user_id: number
+  job_id: number
+  name: string
+  base_model: string
+  method: string
+  artifact_kind: string
+  artifact_ref: string
+  size_bytes: number
+  status: number
+  channel_id: number
+  model_catalog_id: number
+  created_at: string
+  updated_at: string
+}
+
+/** One bundled demonstration dataset offered by the console. */
+export type DemoDataset = {
+  key: string
+  name: string
+  description: string
+  suggested_pipeline: string
+  format: string
+  rows: number
+  installed: boolean
+}
+
+/** The bundled catalogue plus whether it can be installed right now. */
+export type DemoCatalogue = {
+  configured: boolean
+  datasets: DemoDataset[]
+}
+
+export type DemoInstallResult = {
+  installed: TrainingDataset[]
+  skipped: string[]
+  failed: Array<{ key: string; message: string }>
+}
+
+/** One parameter of a DataFlow pipeline template, as declared by the service. */
+export type PipelineParam = {
+  key: string
+  label: string
+  type: 'string' | 'text' | 'int' | 'float' | 'bool' | 'enum'
+  required?: boolean
+  default?: string | number | boolean | null
+  minimum?: number
+  maximum?: number
+  options?: string[]
+  unit?: string
+  help?: string
+}
+
+export type PipelineTemplate = {
+  id: string
+  name: string
+  description: string
+  input_formats?: string[]
+  params: PipelineParam[]
+}
+
+export type TrainingCapabilities = {
+  pipelines: PipelineTemplate[]
+  methods: string[]
+  stages: string[]
+  hyper_params: PipelineParam[]
+  /** True when the service simulates preparation and training (no GPU). */
+  demo_mode?: boolean
+}
+
+export type TrainingServiceHealth = {
+  ok: boolean
+  /** True when the service simulates preparation and training (no GPU). */
+  demo_mode?: boolean
+  versions: Record<string, string>
+  gpus: Array<Record<string, string>>
+  limits: Record<string, number>
+  active: Record<string, number>
+}
+
+export type TrainingServiceTestResult = {
+  configured: boolean
+  health: TrainingServiceHealth
 }
 
 export type AdminJobStatusPayload = {
@@ -51,6 +169,13 @@ export type ApiResponse<T = unknown> = {
   data: T
 }
 
+/** Server errors may carry a stable code the UI can branch on. */
+export type ApiErrorResponse = {
+  success: false
+  message: string
+  code?: string
+}
+
 export type PagedData<T> = {
   page: number
   page_size: number
@@ -63,5 +188,11 @@ export type ListParams = {
   page_size?: number
   keyword?: string
   status?: number
+  source?: string
   userId?: number
+}
+
+export type LogFrame = {
+  offset: number
+  line: string
 }
