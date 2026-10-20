@@ -1,0 +1,56 @@
+[
+  {
+    "key": "customer-support-alpaca",
+    "file": "sft/customer-support-alpaca.jsonl",
+    "name": "Demo: customer support SFT (alpaca)",
+    "description": "24 bilingual customer-support question/answer pairs in alpaca format. Trains directly with LoRA or full fine-tuning, no data preparation needed.",
+    "suggested_pipeline": "",
+    "format": "alpaca",
+    "rows": 24
+  },
+  {
+    "key": "chat-sharegpt",
+    "file": "sft/chat-sharegpt.jsonl",
+    "name": "Demo: support chat (sharegpt)",
+    "description": "12 multi-turn support conversations in sharegpt format. Proves the sharegpt dataset path end to end.",
+    "suggested_pipeline": "",
+    "format": "sharegpt",
+    "rows": 12
+  },
+  {
+    "key": "product-manual",
+    "file": "raw/product-manual.txt",
+    "name": "Demo raw: product manual (document)",
+    "description": "A 3.2k-character product manual. Run the Documents to Q&A pipeline to chunk the text and generate QA pairs.",
+    "suggested_pipeline": "kb_pdf_to_qa",
+    "format": "txt",
+    "rows": 0
+  },
+  {
+    "key": "noisy-qa",
+    "file": "raw/noisy-qa.jsonl",
+    "name": "Demo raw: noisy QA pairs",
+    "description": "16 low-quality, partly misspelled question/answer pairs. Run Noisy text to clean SFT to score, filter and rewrite them.",
+    "suggested_pipeline": "text_clean_sft",
+    "format": "jsonl",
+    "rows": 16
+  },
+  {
+    "key": "reasoning-math",
+    "file": "raw/reasoning-math.jsonl",
+    "name": "Demo raw: reasoning math",
+    "description": "12 math word problems with reference answers. Run Reasoning augmentation to generate and verify step-by-step solutions.",
+    "suggested_pipeline": "reasoning_sft",
+    "format": "jsonl",
+    "rows": 12
+  },
+  {
+    "key": "code-samples",
+    "file": "raw/code-samples.jsonl",
+    "name": "Demo raw: code samples",
+    "description": "10 instruction/code samples, including one test-only snippet that the pipeline drops. Run Code corpus to SFT.",
+    "suggested_pipeline": "code_sft",
+    "format": "jsonl",
+    "rows": 10
+  }
+]

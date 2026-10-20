@@ -20,9 +20,21 @@ func setupRouter(t *testing.T) *gin.Engine {
 	originalDB := model.DB
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	require.NoError(t, err)
-	require.NoError(t, db.AutoMigrate(&FinetuneJob{}))
+	require.NoError(t, db.AutoMigrate(
+		&FinetuneJob{}, &TrainingDataset{}, &TrainedModel{},
+		&model.Token{}, &model.Model{}, &model.Channel{}, &model.Ability{},
+		// Registering a catalog model triggers the metadata sync, which stores
+		// its lock in the options table.
+		&model.Option{},
+	))
 	model.DB = db
 	t.Cleanup(func() { model.DB = originalDB })
+
+	// The gateway enables token caching in production with an initialised Redis
+	// client; the test harness has no Redis, so the cache path is disabled here.
+	originalRedisEnabled := common.RedisEnabled
+	common.RedisEnabled = false
+	t.Cleanup(func() { common.RedisEnabled = originalRedisEnabled })
 
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
@@ -40,10 +52,10 @@ func requireFailure(t *testing.T, resp map[string]any) {
 	require.Equal(t, false, resp["success"], "expected the request to fail")
 }
 
-func createDraftJob(t *testing.T, r *gin.Engine, userId int) map[string]any {
+func createDraftJob(t *testing.T, r *gin.Engine, userId, datasetId int) map[string]any {
 	t.Helper()
 	_, resp, err := testauth.DoJSON(r, http.MethodPost, "/api/model-training/jobs", userId, common.RoleCommonUser,
-		map[string]any{"name": "my job", "base_model": "gpt-x", "method": MethodLora})
+		map[string]any{"name": "my job", "base_model": "gpt-x", "method": MethodLora, "dataset_id": datasetId})
 	require.NoError(t, err)
 	requireSuccess(t, resp)
 	job, ok := resp["data"].(map[string]any)
@@ -52,8 +64,10 @@ func createDraftJob(t *testing.T, r *gin.Engine, userId int) map[string]any {
 }
 
 func TestFinetuneJobLifecycle(t *testing.T) {
+	fake := newFakeTrainingService(t)
+	configureTrainingService(t, fake.url())
 	r := setupRouter(t)
-	createDraftJob(t, r, 1)
+	createDraftJob(t, r, 1, createReadyDataset(t, 1).Id)
 
 	// Drafts are editable and deletable by the owner.
 	_, resp, err := testauth.DoJSON(r, http.MethodPut, "/api/model-training/jobs/1", 1, common.RoleCommonUser,
@@ -73,8 +87,8 @@ func TestFinetuneJobLifecycle(t *testing.T) {
 	require.NoError(t, err)
 	requireFailure(t, resp)
 
-	// Submit moves the job into the admin queue; drafts can then no longer
-	// be edited.
+	// Submit dispatches the job to the training service; drafts can then no
+	// longer be edited.
 	_, resp, err = testauth.DoJSON(r, http.MethodPost, "/api/model-training/jobs/1/submit", 1, common.RoleCommonUser, nil)
 	require.NoError(t, err)
 	requireSuccess(t, resp)
@@ -114,8 +128,10 @@ func TestFinetuneJobLifecycle(t *testing.T) {
 }
 
 func TestFinetuneJobAdminGatingAndCancel(t *testing.T) {
+	fake := newFakeTrainingService(t)
+	configureTrainingService(t, fake.url())
 	r := setupRouter(t)
-	createDraftJob(t, r, 1)
+	createDraftJob(t, r, 1, createReadyDataset(t, 1).Id)
 
 	// Non-admin users cannot reach the admin endpoints.
 	w, _, err := testauth.DoJSON(r, http.MethodGet, "/api/model-training/admin/jobs", 1, common.RoleCommonUser, nil)

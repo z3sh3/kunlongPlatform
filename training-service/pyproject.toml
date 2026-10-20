@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "new-api-training-service"
+version = "0.1.0"
+description = "DataFlow data preparation and LLaMA Factory fine-tuning for the new-api model training console"
+requires-python = ">=3.10"
+# The heavy dependencies (open-dataflow, llamafactory) are installed separately
+# on the GPU host; see requirements.txt. python-multipart is required by FastAPI
+# for the dataset upload endpoint.
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "python-multipart>=0.0.9",
+    "pypdf>=4.0",
+]
+
+[tool.setuptools]
+packages = ["app"]
+
+[tool.pyright]
+# `app` is the local package; the service is started from this directory.
+extraPaths = ["."]
+# open-dataflow and llamafactory live in the operator's GPU virtualenv. They are
+# imported lazily at run time and reported with an actionable PrepareError, so a
+# missing install must not be a static-analysis error here.
+reportMissingImports = "warning"
+reportMissingModuleSource = "none"

@@ -1,0 +1,12 @@
+{"messages": [{"role": "user", "content": "我们的退款政策是什么？"}, {"role": "assistant", "content": "未发货可自助取消并原路退款；已发货支持签收后 7 天无理由退货，质量问题 15 天内可换货，运费由平台承担。"}]}
+{"messages": [{"role": "user", "content": "退款多久到账？"}, {"role": "assistant", "content": "审核通过后 1-3 个工作日原路退回。银行卡可能因发卡行处理延迟至 7 个工作日。"}]}
+{"messages": [{"role": "user", "content": "会员可以退款吗？"}, {"role": "assistant", "content": "会员开通后 7 天内未使用权益可申请全额退款；超过 7 天按剩余天数比例退款。"}]}
+{"messages": [{"role": "user", "content": "订单能合并发货吗？"}, {"role": "assistant", "content": "同一收货地址、同一仓库且未出库的订单可以合并，请联系客服提供两个订单号。"}]}
+{"messages": [{"role": "user", "content": "支持哪些支付方式？"}, {"role": "assistant", "content": "支持微信、支付宝、银行卡以及部分地区的货到付款；企业客户可申请对公转账。"}]}
+{"messages": [{"role": "user", "content": "如何申请售后？"}, {"role": "assistant", "content": "在订单详情点击「申请售后」，选择退货或换货并上传凭证，客服会在 24 小时内响应。"}]}
+{"messages": [{"role": "user", "content": "发票什么时候开？"}, {"role": "assistant", "content": "确认收货后可申请开票，电子发票 1-2 个工作日发送至邮箱，专票需 3 个工作日。"}]}
+{"messages": [{"role": "user", "content": "设备保修多久？"}, {"role": "assistant", "content": "主机 12 个月，配件 3 个月，均从签收日开始计算，需提供订单号或发票。"}]}
+{"messages": [{"role": "user", "content": "可以改收货地址吗？"}, {"role": "assistant", "content": "未发货可在订单详情自行修改，已发货请联系客服尝试拦截，成功率取决于物流状态。"}]}
+{"messages": [{"role": "user", "content": "积分会过期吗？"}, {"role": "assistant", "content": "积分在确认收货后 7 天到账，有效期 12 个月，过期未使用将自动清零。"}]}
+{"messages": [{"role": "user", "content": "有发票还能七天无理由退货吗？"}, {"role": "assistant", "content": "可以。需将发票一并退回或提供作废证明，退款金额以实付金额为准。"}]}
+{"messages": [{"role": "user", "content": "客服工作时间是？"}, {"role": "assistant", "content": "在线客服每日 9:00-21:00，节假日不休；电话客服工作日 9:00-18:00。"}]}

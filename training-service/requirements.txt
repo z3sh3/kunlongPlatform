@@ -1,0 +1,25 @@
+# Python dependencies for the training service.
+#
+#   pip install -r requirements.txt
+#
+# The two heavyweight frameworks are NOT listed here on purpose: they are
+# installed from the operator's local clones on the GPU host so the exact
+# versions match the machine.
+#
+#   pip install -e /opt/DataFlow         # provides `dataflow` and the operators
+#   pip install -e /opt/LLaMA-Factory    # provides `llamafactory-cli`
+#
+# Then start the service:
+#
+#   TRAINING_SERVICE_TOKEN=<shared secret> \
+#   DATA_ROOT=/var/lib/training \
+#   LLAMAFACTORY_HOME=/opt/LLaMA-Factory \
+#   TRAINING_SERVICE_HOST=0.0.0.0 \
+#   uvicorn app.main:app --host "$TRAINING_SERVICE_HOST" --port 8083
+
+fastapi>=0.110
+uvicorn>=0.29
+# Required by FastAPI for multipart dataset uploads.
+python-multipart>=0.0.9
+# PDF text extraction for the document-to-Q&A pipeline.
+pypdf>=4.0

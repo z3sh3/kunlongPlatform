@@ -1,0 +1,24 @@
+{"instruction": "Answer the customer question politely.", "input": "我上周买的耳机左边没有声音，怎么处理？", "output": "您好，很抱歉给您带来不便。请先确认耳机已充满电并重新配对；若左耳仍无声，属于非人为硬件故障，可在收货后 30 天内申请换新。请回复订单号，我们为您安排免费换货。"}
+{"instruction": "Answer the customer question politely.", "input": "订单什么时候发货？", "output": "您好，现货商品在付款后 24 小时内发出，节假日顺延。您可以在「我的订单」中查看物流单号，发出后一般 2-4 天送达。"}
+{"instruction": "Answer the customer question politely.", "input": "可以开具增值税专用发票吗？", "output": "可以。请提供公司名称、纳税人识别号、开户行及账号、注册地址与电话，我们会在 3 个工作日内开具并发送电子发票。"}
+{"instruction": "Answer the customer question politely.", "input": "我想取消刚下的订单。", "output": "您好，未发货订单可以自助取消，款项将原路退回，通常 1-3 个工作日到账。若已发货，请在收到后按七天无理由退货流程处理。"}
+{"instruction": "Answer the customer question politely.", "input": "有质量问题可以退货吗？", "output": "可以。非人为质量问题支持 7 天无理由退货与 15 天换货，运费由我们承担。请在订单页提交售后申请并上传问题照片。"}
+{"instruction": "Answer the customer question politely.", "input": "会员有什么优惠？", "output": "会员每月可获得专属优惠券，享受部分商品 95 折，并支持积分兑换运费券。积分在确认收货后 7 天到账，有效期 12 个月。"}
+{"instruction": "Answer the customer question politely.", "input": "How long is the warranty?", "output": "All our devices include a 12-month limited warranty covering manufacturing defects. Accessories carry a 3-month warranty. Keep your order number for claims."}
+{"instruction": "Answer the customer question politely.", "input": "Can I change my shipping address?", "output": "Yes, as long as the order has not shipped. Open the order details and choose Edit address, or reply with the new address and we will update it for you."}
+{"instruction": "Answer the customer question politely.", "input": "付款失败怎么办？", "output": "请先确认银行卡余额与单笔限额，或更换支付方式重试。若多次失败，可能是风控拦截，请联系客服并提供订单号，我们会协助核实。"}
+{"instruction": "Answer the customer question politely.", "input": "发票可以重开吗？", "output": "可以。若发票信息有误，请在开票后 30 天内提交重开申请，并将原发票作废。电子发票重开一般 1-2 个工作日完成。"}
+{"instruction": "Answer the customer question politely.", "input": "支持货到付款吗？", "output": "目前部分地区支持货到付款，下单时可在支付方式中选择。货到付款订单不支持优惠券叠加，且需当面验货。"}
+{"instruction": "Answer the customer question politely.", "input": "退货运费谁承担？", "output": "质量问题由我们承担来回运费；七天无理由退货由买家承担寄回运费，若购买了运费险可按保险条款理赔。"}
+{"instruction": "Summarize the policy for the agent.", "input": "客户要求加急发货。", "output": "加急发货需在下单后 2 小时内提出，且仅限工作日 16:00 前。我们可优先安排出库，但无法承诺具体到达时间，请提前告知客户预期。"}
+{"instruction": "Summarize the policy for the agent.", "input": "客户投诉客服响应慢。", "output": "先致歉并说明当前咨询量较大，承诺 2 小时内回复。若客户情绪激烈，升级至主管并记录工单，后续 24 小时内回访一次。"}
+{"instruction": "Answer the customer question politely.", "input": "积分怎么用？", "output": "结算页勾选「使用积分」即可抵扣，100 积分抵 1 元，单笔最多抵扣订单金额的 20%。积分不可提现、不可转让。"}
+{"instruction": "Answer the customer question politely.", "input": "耳机支持降噪吗？", "output": "支持主动降噪，可在 App 中切换「强降噪 / 通透 / 关闭」三档。通话时自动启用双麦克风降噪。"}
+{"instruction": "Answer the customer question politely.", "input": "如何重置设备？", "output": "长按电源键 10 秒至指示灯快闪即完成重置。重置后需在 App 中重新配对，历史设置会被清除。"}
+{"instruction": "Answer the customer question politely.", "input": "支持以旧换新吗？", "output": "支持。旧机需功能正常、无进液与明显变形，评估价在提交后 1 个工作日内给出，抵扣金额直接用于新订单。"}
+{"instruction": "Answer the customer question politely.", "input": "包裹显示签收但我没收到。", "output": "请先确认是否由家人或门卫代收，并查看物流照片。若 24 小时内仍未找到，我们将在 48 小时内发起物流核查并为您补发或退款。"}
+{"instruction": "Answer the customer question politely.", "input": "可以修改订单里的商品吗？", "output": "订单提交后无法直接改商品。请取消原订单后重新下单；若已支付且未发货，取消后款项原路退回。"}
+{"instruction": "Answer the customer question politely.", "input": "保修需要提供什么？", "output": "需要订单号或发票，以及故障描述。寄修前请备份数据并解除账号绑定，维修周期一般为 5-7 个工作日。"}
+{"instruction": "Answer the customer question politely.", "input": "优惠券为什么不能用？", "output": "请确认优惠券在有效期内、满足门槛金额且适用于当前品类；特价商品与部分品牌不参与叠加。若仍无法使用，请提供券码由客服核查。"}
+{"instruction": "Answer the customer question politely.", "input": "Do you ship internationally?", "output": "We currently ship to mainland China, Hong Kong, Singapore and Malaysia. International orders may incur duties paid by the recipient."}
+{"instruction": "Summarize the policy for the agent.", "input": "客户要求开具纸质发票。", "output": "默认开具电子发票；如需纸质发票请说明并承担邮寄费用，开具后 5-7 个工作日寄出，不支持部分商品单独开票。"}
