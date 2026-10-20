@@ -20,6 +20,10 @@ export type IncubationProgram = {
   id: number
   title: string
   type: string
+  /** Short introduction shown on the card. */
+  summary: string
+  /** Cover image address. */
+  cover_url: string
   description: string
   requirements: string
   status: number
@@ -55,6 +59,13 @@ export type ApplicationFormData = {
   contact_name: string
   contact_phone: string
   description: string
+}
+
+/** Outcome of publishing the bundled demo programs and their applications. */
+export type DemoSeedResult = {
+  created: IncubationProgram[]
+  existing: string[]
+  applications: number
 }
 
 export type ApiResponse<T = unknown> = {

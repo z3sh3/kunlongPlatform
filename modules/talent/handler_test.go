@@ -134,3 +134,59 @@ func TestTrainingCourseAdminGating(t *testing.T) {
 	items, _ := data["items"].([]any)
 	assert.Empty(t, items)
 }
+
+func TestSeedDemoCourses(t *testing.T) {
+	r := setupRouter(t)
+
+	_, resp, err := testauth.DoJSON(r, http.MethodPost, "/api/talent-training/admin/demo-courses", 9, common.RoleAdminUser, nil)
+	require.NoError(t, err)
+	requireSuccess(t, resp)
+	data, ok := resp["data"].(map[string]any)
+	require.True(t, ok)
+	created, _ := data["created"].([]any)
+	require.Len(t, created, 3)
+	assert.Equal(t, len(demoCourses), int(data["enrollments"].(float64)))
+
+	// Every demo case is published with a card summary and a cover image, so the
+	// browse catalogue can render it as-is.
+	_, resp, err = testauth.DoJSON(r, http.MethodGet, "/api/talent-training/courses", 2, common.RoleCommonUser, nil)
+	require.NoError(t, err)
+	requireSuccess(t, resp)
+	data, ok = resp["data"].(map[string]any)
+	require.True(t, ok)
+	items, _ := data["items"].([]any)
+	require.Len(t, items, 3)
+	for _, item := range items {
+		course := item.(map[string]any)
+		assert.NotEmpty(t, course["cover_url"])
+		assert.NotEmpty(t, course["summary"])
+	}
+
+	// The seeded enrollments cover every stage of the enrollment flow.
+	_, resp, err = testauth.DoJSON(r, http.MethodGet, "/api/talent-training/enrollments/my", 9, common.RoleAdminUser, nil)
+	require.NoError(t, err)
+	requireSuccess(t, resp)
+	data, ok = resp["data"].(map[string]any)
+	require.True(t, ok)
+	items, _ = data["items"].([]any)
+	require.Len(t, items, 3)
+	statuses := make(map[int]bool, 3)
+	for _, item := range items {
+		statuses[int(item.(map[string]any)["status"].(float64))] = true
+	}
+	for _, status := range []int{shared.ReviewStatusPending, shared.ReviewStatusApproved, EnrollmentStatusCompleted} {
+		assert.True(t, statuses[status], "demo enrollments should cover status %d", status)
+	}
+
+	// Seeding again reports the existing cases and creates nothing.
+	_, resp, err = testauth.DoJSON(r, http.MethodPost, "/api/talent-training/admin/demo-courses", 9, common.RoleAdminUser, nil)
+	require.NoError(t, err)
+	requireSuccess(t, resp)
+	data, ok = resp["data"].(map[string]any)
+	require.True(t, ok)
+	created, _ = data["created"].([]any)
+	assert.Empty(t, created)
+	existing, _ := data["existing"].([]any)
+	assert.Len(t, existing, 3)
+	assert.Equal(t, 0, int(data["enrollments"].(float64)))
+}

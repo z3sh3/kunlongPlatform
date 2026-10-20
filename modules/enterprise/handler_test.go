@@ -148,3 +148,59 @@ func TestIncubationAdminGating(t *testing.T) {
 	items, _ := data["items"].([]any)
 	assert.Empty(t, items)
 }
+
+func TestSeedDemoPrograms(t *testing.T) {
+	r := setupRouter(t)
+
+	_, resp, err := testauth.DoJSON(r, http.MethodPost, "/api/enterprise-incubation/admin/demo-programs", 9, common.RoleAdminUser, nil)
+	require.NoError(t, err)
+	requireSuccess(t, resp)
+	data, ok := resp["data"].(map[string]any)
+	require.True(t, ok)
+	created, _ := data["created"].([]any)
+	require.Len(t, created, 3)
+	assert.Equal(t, len(demoPrograms), int(data["applications"].(float64)))
+
+	// Every demo case is published with a card summary and a cover image, so the
+	// browse catalogue can render it as-is.
+	_, resp, err = testauth.DoJSON(r, http.MethodGet, "/api/enterprise-incubation/programs", 2, common.RoleCommonUser, nil)
+	require.NoError(t, err)
+	requireSuccess(t, resp)
+	data, ok = resp["data"].(map[string]any)
+	require.True(t, ok)
+	items, _ := data["items"].([]any)
+	require.Len(t, items, 3)
+	for _, item := range items {
+		program := item.(map[string]any)
+		assert.NotEmpty(t, program["cover_url"])
+		assert.NotEmpty(t, program["summary"])
+	}
+
+	// The seeded applications cover every stage of the review flow.
+	_, resp, err = testauth.DoJSON(r, http.MethodGet, "/api/enterprise-incubation/applications/my", 9, common.RoleAdminUser, nil)
+	require.NoError(t, err)
+	requireSuccess(t, resp)
+	data, ok = resp["data"].(map[string]any)
+	require.True(t, ok)
+	items, _ = data["items"].([]any)
+	require.Len(t, items, 3)
+	statuses := make(map[int]bool, 3)
+	for _, item := range items {
+		statuses[int(item.(map[string]any)["status"].(float64))] = true
+	}
+	for _, status := range []int{shared.ReviewStatusPending, shared.ReviewStatusReviewing, shared.ReviewStatusApproved} {
+		assert.True(t, statuses[status], "demo applications should cover status %d", status)
+	}
+
+	// Seeding again reports the existing cases and creates nothing.
+	_, resp, err = testauth.DoJSON(r, http.MethodPost, "/api/enterprise-incubation/admin/demo-programs", 9, common.RoleAdminUser, nil)
+	require.NoError(t, err)
+	requireSuccess(t, resp)
+	data, ok = resp["data"].(map[string]any)
+	require.True(t, ok)
+	created, _ = data["created"].([]any)
+	assert.Empty(t, created)
+	existing, _ := data["existing"].([]any)
+	assert.Len(t, existing, 3)
+	assert.Equal(t, 0, int(data["applications"].(float64)))
+}

@@ -21,9 +21,13 @@ const (
 // TrainingCourse is a certification-training or consultation course
 // published by an administrator.
 type TrainingCourse struct {
-	Id          int            `json:"id"`
-	Title       string         `json:"title" gorm:"index;size:255"`
-	Category    string         `json:"category" gorm:"size:64;index"`
+	Id       int    `json:"id"`
+	Title    string `json:"title" gorm:"index;size:255"`
+	Category string `json:"category" gorm:"size:64;index"`
+	// Summary is the short introduction shown on the card; Description keeps the
+	// full text for the detail view.
+	Summary     string         `json:"summary" gorm:"size:500"`
+	CoverUrl    string         `json:"cover_url" gorm:"size:512"`
 	Description string         `json:"description" gorm:"type:text"`
 	Content     string         `json:"content" gorm:"type:text"`
 	Schedule    string         `json:"schedule" gorm:"type:text"`

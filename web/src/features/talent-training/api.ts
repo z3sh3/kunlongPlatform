@@ -22,6 +22,7 @@ import { requireServerSuccess } from '@/lib/server-error-message'
 import type {
   ApiResponse,
   CourseFormData,
+  DemoSeedResult,
   ListParams,
   PagedData,
   TrainingCourse,
@@ -105,6 +106,12 @@ export async function adminUpdateCourseStatus(
     status,
   })
   requireServerSuccess(res.data)
+}
+
+/** Publishes the bundled demo courses and one enrollment per course. */
+export async function adminSeedDemoCourses(): Promise<DemoSeedResult> {
+  const res = await api.post(`${BASE_URL}/admin/demo-courses`)
+  return requireServerSuccess<ApiResponse<DemoSeedResult>>(res.data).data
 }
 
 export async function adminListEnrollments(

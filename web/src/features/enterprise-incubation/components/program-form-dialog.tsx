@@ -35,6 +35,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -49,6 +50,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { MediaUpload } from '@/components/media-upload'
 import { handleServerError } from '@/lib/handle-server-error'
 
 import { adminCreateProgram, adminUpdateProgram } from '../api'
@@ -87,6 +89,8 @@ export function ProgramFormDialog(props: ProgramFormDialogProps) {
             )
               ? (program.type as ProgramFormValues['type'])
               : PROGRAM_TYPE.INCUBATION,
+            summary: program.summary ?? '',
+            cover_url: program.cover_url ?? '',
             description: program.description,
             requirements: program.requirements,
           }
@@ -186,6 +190,48 @@ export function ProgramFormDialog(props: ProgramFormDialogProps) {
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='cover_url'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('Cover image URL')}</FormLabel>
+                  <FormControl>
+                    <MediaUpload
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      module='enterprise'
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t(
+                      'Optional. An http(s) link or a site path starting with /. A gradient placeholder is shown when empty.'
+                    )}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='summary'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('Card summary')}</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder={t('e.g. A 6-month incubation track with mentors and funding')}
+                      {...field}
+                      value={field.value ?? ''}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t('Short introduction shown on the card, up to 500 characters.')}
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

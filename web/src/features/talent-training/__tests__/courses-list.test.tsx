@@ -17,7 +17,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { Toaster, toast } from 'sonner'
 import { afterEach, expect, test, vi } from 'vitest'
 
 import { api } from '@/lib/api'
@@ -36,6 +38,8 @@ const course: TrainingCourse = {
   id: 1,
   title: 'LLM engineer certification',
   category: COURSE_CATEGORY.CERTIFICATION,
+  summary: 'Certification bootcamp intro',
+  cover_url: '',
   description: 'A certification course',
   content: '',
   schedule: '',
@@ -65,6 +69,7 @@ function renderCourses(mode: 'browse' | 'admin') {
   return render(
     <QueryClientProvider client={client}>
       <CoursesList mode={mode} />
+      <Toaster />
     </QueryClientProvider>
   )
 }
@@ -81,6 +86,7 @@ function renderEnrollments(mode: 'mine' | 'admin') {
 }
 
 afterEach(() => {
+  toast.dismiss()
   vi.restoreAllMocks()
   useAuthStore.getState().auth.reset()
 })
@@ -101,6 +107,12 @@ test('browse mode renders a published certification course with enroll action', 
   ).toBeInTheDocument()
   expect(screen.getByText('Certification training')).toBeInTheDocument()
   expect(screen.getByText('30')).toBeInTheDocument()
+  // Card layout contract: the short introduction and the placeholder cover are
+  // rendered instead of a table row.
+  expect(
+    screen.getByText('Certification bootcamp intro')
+  ).toBeInTheDocument()
+  expect(screen.getByText('LL')).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Enroll' })).toBeInTheDocument()
 })
 
@@ -145,4 +157,34 @@ test('admin enrollments list offers approve and reject for pending records', asy
   expect(screen.getByText('Pending')).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Reject' })).toBeInTheDocument()
+})
+
+test('admin can generate the demo cases and sees the created count', async () => {
+  useAuthStore.getState().auth.setUser({ id: 9, username: 'root', role: 100 })
+  vi.spyOn(api, 'get').mockResolvedValue({
+    data: {
+      success: true,
+      data: { page: 1, page_size: 10, total: 0, items: [] },
+    },
+  })
+  const post = vi.spyOn(api, 'post').mockResolvedValue({
+    data: {
+      success: true,
+      data: { created: [course], existing: [], enrollments: 1 },
+    },
+  })
+
+  renderCourses('admin')
+
+  const user = userEvent.setup()
+  await user.click(
+    await screen.findByRole('button', { name: 'Generate demo cases' })
+  )
+
+  await waitFor(() =>
+    expect(post).toHaveBeenCalledWith('/api/talent-training/admin/demo-courses')
+  )
+  expect(
+    await screen.findByText('Created 1 demo case(s)')
+  ).toBeInTheDocument()
 })

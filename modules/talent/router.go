@@ -36,6 +36,7 @@ func registerRoutes(rg *gin.RouterGroup, userAuth, adminAuth gin.HandlerFunc) {
 		{
 			admin.GET("/courses", AdminListCourses)
 			admin.POST("/courses", AdminCreateCourse)
+			admin.POST("/demo-courses", SeedDemoCourses)
 			admin.PUT("/courses/:id", AdminUpdateCourse)
 			admin.DELETE("/courses/:id", AdminDeleteCourse)
 			admin.PUT("/courses/:id/status", AdminUpdateCourseStatus)

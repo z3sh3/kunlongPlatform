@@ -13,6 +13,8 @@ import (
 type courseRequest struct {
 	Title       string `json:"title" binding:"required"`
 	Category    string `json:"category" binding:"required"`
+	Summary     string `json:"summary"`
+	CoverUrl    string `json:"cover_url"`
 	Description string `json:"description"`
 	Content     string `json:"content"`
 	Schedule    string `json:"schedule"`
@@ -194,6 +196,8 @@ func AdminCreateCourse(c *gin.Context) {
 	course := TrainingCourse{
 		Title:       req.Title,
 		Category:    req.Category,
+		Summary:     shared.NormalizeSummary(req.Summary),
+		CoverUrl:    shared.NormalizeCoverUrl(req.CoverUrl),
 		Description: req.Description,
 		Content:     req.Content,
 		Schedule:    req.Schedule,
@@ -234,6 +238,8 @@ func AdminUpdateCourse(c *gin.Context) {
 		"title":       req.Title,
 		"category":    req.Category,
 		"description": req.Description,
+		"summary":     shared.NormalizeSummary(req.Summary),
+		"cover_url":   shared.NormalizeCoverUrl(req.CoverUrl),
 		"content":     req.Content,
 		"schedule":    req.Schedule,
 		"capacity":    req.Capacity,

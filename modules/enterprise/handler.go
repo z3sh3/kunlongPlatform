@@ -13,6 +13,8 @@ import (
 type programRequest struct {
 	Title        string `json:"title" binding:"required"`
 	Type         string `json:"type" binding:"required"`
+	Summary      string `json:"summary"`
+	CoverUrl     string `json:"cover_url"`
 	Description  string `json:"description"`
 	Requirements string `json:"requirements"`
 }
@@ -179,6 +181,8 @@ func AdminCreateProgram(c *gin.Context) {
 	program := IncubationProgram{
 		Title:        req.Title,
 		Type:         req.Type,
+		Summary:      shared.NormalizeSummary(req.Summary),
+		CoverUrl:     shared.NormalizeCoverUrl(req.CoverUrl),
 		Description:  req.Description,
 		Requirements: req.Requirements,
 		Status:       shared.PublishStatusDraft,
@@ -215,6 +219,8 @@ func AdminUpdateProgram(c *gin.Context) {
 		"title":        req.Title,
 		"type":         req.Type,
 		"description":  req.Description,
+		"summary":      shared.NormalizeSummary(req.Summary),
+		"cover_url":    shared.NormalizeCoverUrl(req.CoverUrl),
 		"requirements": req.Requirements,
 	}
 	if err := model.DB.Model(&program).Updates(updates).Error; err != nil {

@@ -23,14 +23,16 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
-import { ServerPagination, StaticDataTable } from '@/components/data-table'
-import { Button } from '@/components/ui/button'
+import { ContentCoverCard } from '@/components/content-cover-card'
+import { ServerPagination } from '@/components/data-table'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { handleServerError } from '@/lib/handle-server-error'
 
 import {
   adminDeleteProgram,
   adminListPrograms,
+  adminSeedDemoPrograms,
   adminUpdateProgramStatus,
   listPrograms,
 } from '../api'
@@ -103,6 +105,28 @@ export function ProgramsList(props: ProgramsListProps) {
     onError: (error) => handleServerError(error),
   })
 
+  // Publishes the three bundled demo cases (program + one application per
+  // review stage). Idempotent: existing records are reported, not duplicated.
+  const seedDemoMutation = useMutation({
+    mutationFn: () => adminSeedDemoPrograms(),
+    onSuccess: (result) => {
+      if (result.created.length > 0) {
+        toast.success(
+          t('Created {{count}} demo case(s)', {
+            count: result.created.length,
+          })
+        )
+      } else {
+        toast.info(t('Demo cases already exist'))
+      }
+      invalidate()
+      queryClient.invalidateQueries({
+        queryKey: ['enterprise-incubation', 'applications'],
+      })
+    },
+    onError: (error) => handleServerError(error),
+  })
+
   const renderTypeBadge = (program: IncubationProgram) => {
     let label: string
     if (program.type === PROGRAM_TYPE.INCUBATION) {
@@ -136,120 +160,120 @@ export function ProgramsList(props: ProgramsListProps) {
     )
   }
 
-  const columns = [
-    {
-      id: 'title',
-      header: t('Title'),
-      cell: (program: IncubationProgram) => (
-        <div className='min-w-0'>
-          <p className='truncate font-medium'>{program.title}</p>
-          {program.description ? (
-            <p className='text-muted-foreground truncate text-xs'>
-              {program.description}
-            </p>
-          ) : null}
-        </div>
-      ),
-    },
-    {
-      id: 'type',
-      header: t('Type'),
-      cell: renderTypeBadge,
-    },
-    ...(isAdmin
-      ? [
-          {
-            id: 'status',
-            header: t('Status'),
-            cell: (program: IncubationProgram) => (
-              <Badge variant='outline'>
-                {t(
-                  getOptionLabelKey(PUBLISH_STATUS_OPTIONS, program.status) ??
-                    'Draft'
-                )}
-              </Badge>
-            ),
-          },
-        ]
-      : []),
-    {
-      id: 'created_at',
-      header: t('Created'),
-      cell: (program: IncubationProgram) =>
-        program.created_at
-          ? dayjs(program.created_at).format('YYYY-MM-DD')
-          : '-',
-    },
-    {
-      id: 'actions',
-      header: '',
-      className: 'text-right',
-      cell: (program: IncubationProgram) => (
-        <div className='flex justify-end gap-1'>
-          {props.mode === 'browse' ? (
-            <Button
-              size='sm'
-              onClick={() => {
-                setApplyProgramId(program.id)
-                setApplyOpen(true)
-              }}
-            >
-              {t('Apply')}
-            </Button>
-          ) : null}
-          {isAdmin ? (
-            <>
-              <Button
-                variant='ghost'
-                size='sm'
-                onClick={() => {
-                  setEditing(program)
-                  setFormOpen(true)
-                }}
-              >
-                {t('Edit')}
-              </Button>
-              {renderAdminStatusButton(program)}
-              <Button
-                variant='ghost'
-                size='sm'
-                className='text-destructive hover:text-destructive'
-                onClick={() => deleteMutation.mutate(program.id)}
-                disabled={deleteMutation.isPending}
-              >
-                {t('Delete')}
-              </Button>
-            </>
-          ) : null}
-        </div>
-      ),
-    },
-  ]
+  const renderActions = (program: IncubationProgram) => {
+    if (!isAdmin) {
+      return (
+        <Button
+          size='sm'
+          onClick={() => {
+            setApplyProgramId(program.id)
+            setApplyOpen(true)
+          }}
+        >
+          {t('Apply')}
+        </Button>
+      )
+    }
+    return (
+      <>
+        <Button
+          variant='ghost'
+          size='sm'
+          onClick={() => {
+            setEditing(program)
+            setFormOpen(true)
+          }}
+        >
+          {t('Edit')}
+        </Button>
+        {renderAdminStatusButton(program)}
+        <Button
+          variant='ghost'
+          size='sm'
+          className='text-destructive hover:text-destructive'
+          onClick={() => deleteMutation.mutate(program.id)}
+          disabled={deleteMutation.isPending}
+        >
+          {t('Delete')}
+        </Button>
+      </>
+    )
+  }
 
   const items = programsQuery.data?.items ?? []
+  const isEmpty = programsQuery.isSuccess && items.length === 0
 
   return (
     <div className='space-y-4'>
       {isAdmin ? (
-        <div className='flex justify-end'>
-          <Button
-            onClick={() => {
-              setEditing(null)
-              setFormOpen(true)
-            }}
-          >
-            <Plus />
-            {t('Create program')}
-          </Button>
+        <div className='flex flex-wrap items-center justify-between gap-2'>
+          <p className='text-muted-foreground text-xs'>
+            {t(
+              'Demo cases cover incubation, SME support and government park programs with applications at each review stage.'
+            )}
+          </p>
+          <div className='flex flex-wrap justify-end gap-2'>
+            <Button
+              variant='outline'
+              disabled={seedDemoMutation.isPending}
+              onClick={() => seedDemoMutation.mutate()}
+            >
+              {t('Generate demo cases')}
+            </Button>
+            <Button
+              onClick={() => {
+                setEditing(null)
+                setFormOpen(true)
+              }}
+            >
+              <Plus />
+              {t('Create program')}
+            </Button>
+          </div>
         </div>
       ) : null}
-      <StaticDataTable
-        columns={columns}
-        data={items}
-        getRowKey={(program) => program.id}
-        empty={programsQuery.isSuccess && items.length === 0}
-        emptyContent={t('No programs yet')}
-      />
+
+      {isEmpty ? (
+        <p className='text-muted-foreground py-16 text-center text-sm'>
+          {t('No programs yet')}
+        </p>
+      ) : (
+        <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
+          {items.map((program) => (
+            <ContentCoverCard
+              key={program.id}
+              coverUrl={program.cover_url}
+              title={program.title}
+              summary={program.summary || program.description}
+              badges={
+                <>
+                  {renderTypeBadge(program)}
+                  {isAdmin ? (
+                    <Badge variant='outline'>
+                      {t(
+                        getOptionLabelKey(
+                          PUBLISH_STATUS_OPTIONS,
+                          program.status
+                        ) ?? 'Draft'
+                      )}
+                    </Badge>
+                  ) : null}
+                </>
+              }
+              meta={[
+                {
+                  label: t('Created'),
+                  value: program.created_at
+                    ? dayjs(program.created_at).format('YYYY-MM-DD')
+                    : '-',
+                },
+              ]}
+              actions={renderActions(program)}
+            />
+          ))}
+        </div>
+      )}
+
       {programsQuery.data ? (
         <ServerPagination
           page={page}
@@ -263,6 +287,7 @@ export function ProgramsList(props: ProgramsListProps) {
           disabled={programsQuery.isFetching}
         />
       ) : null}
+
       <ProgramFormDialog
         open={formOpen}
         onOpenChange={setFormOpen}

@@ -16,9 +16,13 @@ const (
 // IncubationProgram is a published offering such as enterprise incubation,
 // SME support, or a government/park special program.
 type IncubationProgram struct {
-	Id           int            `json:"id"`
-	Title        string         `json:"title" gorm:"index;size:255"`
-	Type         string         `json:"type" gorm:"size:32;index"`
+	Id    int    `json:"id"`
+	Title string `json:"title" gorm:"index;size:255"`
+	Type  string `json:"type" gorm:"size:32;index"`
+	// Summary is the short introduction shown on the card; Description keeps the
+	// full text for the detail view.
+	Summary      string         `json:"summary" gorm:"size:500"`
+	CoverUrl     string         `json:"cover_url" gorm:"size:512"`
 	Description  string         `json:"description" gorm:"type:text"`
 	Requirements string         `json:"requirements" gorm:"type:text"`
 	Status       int            `json:"status" gorm:"index"`

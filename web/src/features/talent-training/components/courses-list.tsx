@@ -23,14 +23,16 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
-import { ServerPagination, StaticDataTable } from '@/components/data-table'
-import { Button } from '@/components/ui/button'
+import { ContentCoverCard } from '@/components/content-cover-card'
+import { ServerPagination } from '@/components/data-table'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { handleServerError } from '@/lib/handle-server-error'
 
 import {
   adminDeleteCourse,
   adminListCourses,
+  adminSeedDemoCourses,
   adminUpdateCourseStatus,
   enroll,
   listCourses,
@@ -104,6 +106,28 @@ export function CoursesList(props: CoursesListProps) {
     onError: (error) => handleServerError(error),
   })
 
+  // Publishes the three bundled demo cases (course + one enrollment per review
+  // stage). Idempotent: existing records are reported, not duplicated.
+  const seedDemoMutation = useMutation({
+    mutationFn: () => adminSeedDemoCourses(),
+    onSuccess: (result) => {
+      if (result.created.length > 0) {
+        toast.success(
+          t('Created {{count}} demo case(s)', {
+            count: result.created.length,
+          })
+        )
+      } else {
+        toast.info(t('Demo cases already exist'))
+      }
+      invalidate()
+      queryClient.invalidateQueries({
+        queryKey: ['talent-training', 'enrollments'],
+      })
+    },
+    onError: (error) => handleServerError(error),
+  })
+
   const renderCategoryBadge = (course: TrainingCourse) => (
     <Badge variant='outline'>
       {course.category === COURSE_CATEGORY.CERTIFICATION
@@ -133,132 +157,132 @@ export function CoursesList(props: CoursesListProps) {
     )
   }
 
-  const columns = [
-    {
-      id: 'title',
-      header: t('Title'),
-      cell: (course: TrainingCourse) => (
-        <div className='min-w-0'>
-          <p className='truncate font-medium'>{course.title}</p>
-          {course.description ? (
-            <p className='text-muted-foreground truncate text-xs'>
-              {course.description}
-            </p>
-          ) : null}
-        </div>
-      ),
-    },
-    {
-      id: 'category',
-      header: t('Category'),
-      cell: renderCategoryBadge,
-    },
-    ...(isAdmin
-      ? [
-          {
-            id: 'status',
-            header: t('Status'),
-            cell: (course: TrainingCourse) => (
-              <Badge variant='outline'>
-                {t(
-                  getOptionLabelKey(PUBLISH_STATUS_OPTIONS, course.status) ??
-                    'Draft'
-                )}
-              </Badge>
-            ),
-          },
-        ]
-      : []),
-    {
-      id: 'capacity',
-      header: t('Capacity'),
-      cell: (course: TrainingCourse) =>
-        course.capacity > 0 ? course.capacity.toLocaleString() : t('Unlimited'),
-    },
-    {
-      id: 'price',
-      header: t('Price'),
-      cell: (course: TrainingCourse) =>
-        course.price_mode === PRICE_MODE.PAID
-          ? course.price.toLocaleString()
-          : t('Free'),
-    },
-    {
-      id: 'created_at',
-      header: t('Created'),
-      cell: (course: TrainingCourse) =>
-        course.created_at
-          ? dayjs(course.created_at).format('YYYY-MM-DD')
-          : '-',
-    },
-    {
-      id: 'actions',
-      header: '',
-      className: 'text-right',
-      cell: (course: TrainingCourse) => (
-        <div className='flex justify-end gap-1'>
-          {props.mode === 'browse' ? (
-            <Button
-              size='sm'
-              onClick={() => enrollMutation.mutate(course.id)}
-              disabled={enrollMutation.isPending}
-            >
-              {t('Enroll')}
-            </Button>
-          ) : null}
-          {isAdmin ? (
-            <>
-              <Button
-                variant='ghost'
-                size='sm'
-                onClick={() => {
-                  setEditing(course)
-                  setFormOpen(true)
-                }}
-              >
-                {t('Edit')}
-              </Button>
-              {renderAdminStatusButton(course)}
-              <Button
-                variant='ghost'
-                size='sm'
-                className='text-destructive hover:text-destructive'
-                onClick={() => deleteMutation.mutate(course.id)}
-                disabled={deleteMutation.isPending}
-              >
-                {t('Delete')}
-              </Button>
-            </>
-          ) : null}
-        </div>
-      ),
-    },
-  ]
+  const renderActions = (course: TrainingCourse) => {
+    if (!isAdmin) {
+      return (
+        <Button
+          size='sm'
+          onClick={() => enrollMutation.mutate(course.id)}
+          disabled={enrollMutation.isPending}
+        >
+          {t('Enroll')}
+        </Button>
+      )
+    }
+    return (
+      <>
+        <Button
+          variant='ghost'
+          size='sm'
+          onClick={() => {
+            setEditing(course)
+            setFormOpen(true)
+          }}
+        >
+          {t('Edit')}
+        </Button>
+        {renderAdminStatusButton(course)}
+        <Button
+          variant='ghost'
+          size='sm'
+          className='text-destructive hover:text-destructive'
+          onClick={() => deleteMutation.mutate(course.id)}
+          disabled={deleteMutation.isPending}
+        >
+          {t('Delete')}
+        </Button>
+      </>
+    )
+  }
 
   const items = coursesQuery.data?.items ?? []
+  const isEmpty = coursesQuery.isSuccess && items.length === 0
 
   return (
     <div className='space-y-4'>
       {isAdmin ? (
-        <div className='flex justify-end'>
-          <Button
-            onClick={() => {
-              setEditing(null)
-              setFormOpen(true)
-            }}
-          >
-            <Plus />
-            {t('Create course')}
-          </Button>
+        <div className='flex flex-wrap items-center justify-between gap-2'>
+          <p className='text-muted-foreground text-xs'>
+            {t(
+              'Demo cases cover certification and consultation courses with enrollments at each review stage.'
+            )}
+          </p>
+          <div className='flex flex-wrap justify-end gap-2'>
+            <Button
+              variant='outline'
+              disabled={seedDemoMutation.isPending}
+              onClick={() => seedDemoMutation.mutate()}
+            >
+              {t('Generate demo cases')}
+            </Button>
+            <Button
+              onClick={() => {
+                setEditing(null)
+                setFormOpen(true)
+              }}
+            >
+              <Plus />
+              {t('Create course')}
+            </Button>
+          </div>
         </div>
       ) : null}
-      <StaticDataTable
-        columns={columns}
-        data={items}
-        getRowKey={(course) => course.id}
-        empty={coursesQuery.isSuccess && items.length === 0}
-        emptyContent={t('No courses yet')}
-      />
+
+      {isEmpty ? (
+        <p className='text-muted-foreground py-16 text-center text-sm'>
+          {t('No courses yet')}
+        </p>
+      ) : (
+        <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
+          {items.map((course) => (
+            <ContentCoverCard
+              key={course.id}
+              coverUrl={course.cover_url}
+              title={course.title}
+              summary={course.summary || course.description}
+              badges={
+                <>
+                  {renderCategoryBadge(course)}
+                  {isAdmin ? (
+                    <Badge variant='outline'>
+                      {t(
+                        getOptionLabelKey(
+                          PUBLISH_STATUS_OPTIONS,
+                          course.status
+                        ) ?? 'Draft'
+                      )}
+                    </Badge>
+                  ) : null}
+                </>
+              }
+              meta={[
+                {
+                  label: t('Capacity'),
+                  value:
+                    course.capacity > 0
+                      ? course.capacity.toLocaleString()
+                      : t('Unlimited'),
+                },
+                {
+                  label: t('Price'),
+                  value:
+                    course.price_mode === PRICE_MODE.PAID
+                      ? course.price.toLocaleString()
+                      : t('Free'),
+                },
+                {
+                  label: t('Created'),
+                  value: course.created_at
+                    ? dayjs(course.created_at).format('YYYY-MM-DD')
+                    : '-',
+                },
+              ]}
+              actions={renderActions(course)}
+            />
+          ))}
+        </div>
+      )}
+
       {coursesQuery.data ? (
         <ServerPagination
           page={page}
@@ -272,6 +296,7 @@ export function CoursesList(props: CoursesListProps) {
           disabled={coursesQuery.isFetching}
         />
       ) : null}
+
       <CourseFormDialog
         open={formOpen}
         onOpenChange={setFormOpen}

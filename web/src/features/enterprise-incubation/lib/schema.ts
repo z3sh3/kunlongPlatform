@@ -27,6 +27,8 @@ export const programFormSchema = z.object({
     PROGRAM_TYPE.SME_SUPPORT,
     PROGRAM_TYPE.GOV_PARK,
   ]),
+  summary: z.string(),
+  cover_url: z.string(),
   description: z.string(),
   requirements: z.string(),
 })
@@ -36,6 +38,8 @@ export type ProgramFormValues = z.infer<typeof programFormSchema>
 export const PROGRAM_FORM_DEFAULT_VALUES: ProgramFormValues = {
   title: '',
   type: PROGRAM_TYPE.INCUBATION,
+  summary: '',
+  cover_url: '',
   description: '',
   requirements: '',
 }

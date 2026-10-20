@@ -17,7 +17,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { Toaster, toast } from 'sonner'
 import { afterEach, expect, test, vi } from 'vitest'
 
 import { api } from '@/lib/api'
@@ -36,6 +38,8 @@ const program: IncubationProgram = {
   id: 1,
   title: 'AI startup camp',
   type: PROGRAM_TYPE.INCUBATION,
+  summary: 'Incubation track intro',
+  cover_url: '',
   description: 'Incubation for AI startups',
   requirements: '',
   status: PUBLISH_STATUS.PUBLISHED,
@@ -65,6 +69,7 @@ function renderPrograms(mode: 'browse' | 'admin') {
   return render(
     <QueryClientProvider client={client}>
       <ProgramsList mode={mode} />
+      <Toaster />
     </QueryClientProvider>
   )
 }
@@ -81,6 +86,7 @@ function renderApplications(mode: 'mine' | 'admin') {
 }
 
 afterEach(() => {
+  toast.dismiss()
   vi.restoreAllMocks()
   useAuthStore.getState().auth.reset()
 })
@@ -98,6 +104,10 @@ test('browse mode renders a published program with an apply action', async () =>
 
   expect(await screen.findByText('AI startup camp')).toBeInTheDocument()
   expect(screen.getByText('Enterprise incubation')).toBeInTheDocument()
+  // Card layout contract: the short introduction and the placeholder cover are
+  // rendered instead of a table row.
+  expect(screen.getByText('Incubation track intro')).toBeInTheDocument()
+  expect(screen.getByText('AI')).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Apply' })).toBeInTheDocument()
 })
 
@@ -140,4 +150,36 @@ test('admin applications list renders company info with review actions', async (
   expect(screen.getByRole('button', { name: 'Start review' })).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Reject' })).toBeInTheDocument()
+})
+
+test('admin can generate the demo cases and sees the created count', async () => {
+  useAuthStore.getState().auth.setUser({ id: 9, username: 'root', role: 100 })
+  vi.spyOn(api, 'get').mockResolvedValue({
+    data: {
+      success: true,
+      data: { page: 1, page_size: 10, total: 0, items: [] },
+    },
+  })
+  const post = vi.spyOn(api, 'post').mockResolvedValue({
+    data: {
+      success: true,
+      data: { created: [program], existing: [], applications: 1 },
+    },
+  })
+
+  renderPrograms('admin')
+
+  const user = userEvent.setup()
+  await user.click(
+    await screen.findByRole('button', { name: 'Generate demo cases' })
+  )
+
+  await waitFor(() =>
+    expect(post).toHaveBeenCalledWith(
+      '/api/enterprise-incubation/admin/demo-programs'
+    )
+  )
+  expect(
+    await screen.findByText('Created 1 demo case(s)')
+  ).toBeInTheDocument()
 })

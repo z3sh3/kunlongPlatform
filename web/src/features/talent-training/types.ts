@@ -20,6 +20,10 @@ export type TrainingCourse = {
   id: number
   title: string
   category: string
+  /** Short introduction shown on the card. */
+  summary: string
+  /** Cover image address. */
+  cover_url: string
   description: string
   content: string
   schedule: string
@@ -51,6 +55,13 @@ export type CourseFormData = {
   capacity: number
   price_mode: number
   price: number
+}
+
+/** Outcome of publishing the bundled demo courses and their enrollments. */
+export type DemoSeedResult = {
+  created: TrainingCourse[]
+  existing: string[]
+  enrollments: number
 }
 
 export type ApiResponse<T = unknown> = {

@@ -35,6 +35,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -49,6 +50,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { MediaUpload } from '@/components/media-upload'
 import { handleServerError } from '@/lib/handle-server-error'
 
 import { adminCreateCourse, adminUpdateCourse } from '../api'
@@ -83,6 +85,8 @@ export function CourseFormDialog(props: CourseFormDialogProps) {
         ? {
             title: course.title,
             category: course.category as CourseFormValues['category'],
+            summary: course.summary ?? '',
+            cover_url: course.cover_url ?? '',
             description: course.description,
             content: course.content,
             schedule: course.schedule,
@@ -208,6 +212,48 @@ export function CourseFormDialog(props: CourseFormDialogProps) {
                 )}
               />
             </div>
+            <FormField
+              control={form.control}
+              name='cover_url'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('Cover image URL')}</FormLabel>
+                  <FormControl>
+                    <MediaUpload
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      module='talent'
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t(
+                      'Optional. An http(s) link or a site path starting with /. A gradient placeholder is shown when empty.'
+                    )}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='summary'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('Card summary')}</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder={t('e.g. Three-day certification bootcamp for engineers')}
+                      {...field}
+                      value={field.value ?? ''}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t('Short introduction shown on the card, up to 500 characters.')}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name='description'

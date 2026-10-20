@@ -24,6 +24,8 @@ export const courseFormSchema = z
   .object({
     title: z.string().min(1, 'Title is required'),
     category: z.enum([COURSE_CATEGORY.CERTIFICATION, COURSE_CATEGORY.CONSULTATION]),
+    summary: z.string(),
+    cover_url: z.string(),
     description: z.string(),
     content: z.string(),
     schedule: z.string(),
@@ -41,6 +43,8 @@ export type CourseFormValues = z.infer<typeof courseFormSchema>
 export const COURSE_FORM_DEFAULT_VALUES: CourseFormValues = {
   title: '',
   category: COURSE_CATEGORY.CERTIFICATION,
+  summary: '',
+  cover_url: '',
   description: '',
   content: '',
   schedule: '',

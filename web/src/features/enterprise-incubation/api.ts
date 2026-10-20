@@ -22,6 +22,7 @@ import { requireServerSuccess } from '@/lib/server-error-message'
 import type {
   ApiResponse,
   ApplicationFormData,
+  DemoSeedResult,
   IncubationApplication,
   IncubationProgram,
   ListParams,
@@ -110,6 +111,12 @@ export async function adminUpdateProgramStatus(
     status,
   })
   requireServerSuccess(res.data)
+}
+
+/** Publishes the bundled demo programs and one application per program. */
+export async function adminSeedDemoPrograms(): Promise<DemoSeedResult> {
+  const res = await api.post(`${BASE_URL}/admin/demo-programs`)
+  return requireServerSuccess<ApiResponse<DemoSeedResult>>(res.data).data
 }
 
 export async function adminListApplications(
