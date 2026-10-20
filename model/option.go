@@ -85,6 +85,30 @@ func InitOptionMap() {
 	common.OptionMap["WorkerUrl"] = system_setting.WorkerUrl
 	common.OptionMap["WorkerValidKey"] = system_setting.WorkerValidKey
 	common.OptionMap["WorkerAllowHttpImageRequestEnabled"] = strconv.FormatBool(system_setting.WorkerAllowHttpImageRequestEnabled)
+	// Dify (agent development) integration, read by modules/agentworkshop.
+	common.OptionMap["DifyAPIBaseURL"] = ""
+	common.OptionMap["DifyConsoleURL"] = ""
+	common.OptionMap["DifyAccountEmail"] = ""
+	common.OptionMap["DifyAccountSecret"] = ""
+	// Model training service integration, read by modules/modelsquare. The
+	// integration is enabled once the URL and the secret are both set.
+	common.OptionMap["TrainingServiceURL"] = ""
+	common.OptionMap["TrainingServiceSecret"] = ""
+	common.OptionMap["TrainingServiceLLMBaseURL"] = ""
+	common.OptionMap["TrainingServiceTimeoutSeconds"] = "60"
+	common.OptionMap["TrainingServiceTokenTTLHours"] = "168"
+	// Object storage for user-uploaded media (cover images, audio, video).
+	common.OptionMap["ObjectStorageProvider"] = "tencent"
+	common.OptionMap["ObjectStorageRegion"] = ""
+	common.OptionMap["ObjectStorageBucket"] = ""
+	common.OptionMap["ObjectStorageScheme"] = "https"
+	common.OptionMap["ObjectStorageSecretId"] = ""
+	common.OptionMap["ObjectStorageSecretKey"] = ""
+	common.OptionMap["ObjectStoragePublicBaseURL"] = ""
+	common.OptionMap["ObjectStorageMaxMB"] = "10"
+	// Demo mode serves the training contract in-process, without a GPU host.
+	common.OptionMap["TrainingServiceDemoMode"] = "false"
+	common.OptionMap["TrainingServiceDemoDir"] = ""
 	common.OptionMap["PayAddress"] = ""
 	common.OptionMap["CustomCallbackAddress"] = ""
 	common.OptionMap["EpayId"] = ""

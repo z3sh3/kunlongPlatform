@@ -39,8 +39,7 @@ export type UpdateOptionResponse = {
   message: string
 }
 
-export interface PasskeyDomainChange {
-  rp_id: string
+export interface PasskeyDomainChange {  rp_id: string
   legacy_rp_ids: string
   origins: string
   previous_rp_id: string
@@ -77,7 +76,6 @@ export type ConfirmPaymentComplianceResponse = {
 }
 
 export type SystemTaskStatus = 'pending' | 'running' | 'succeeded' | 'failed'
-
 export type SystemTask<
   TPayload = Record<string, unknown>,
   TState = Record<string, unknown>,
@@ -375,6 +373,21 @@ export type OperationsSettings = {
   WorkerValidKey: string
   WorkerAllowHttpImageRequestEnabled: boolean
   LogConsumeEnabled: boolean
+  DifyAPIBaseURL: string
+  DifyConsoleURL: string
+  DifyAccountEmail: string
+  TrainingServiceURL: string
+  TrainingServiceLLMBaseURL: string
+  TrainingServiceTimeoutSeconds: number
+  TrainingServiceTokenTTLHours: number
+  TrainingServiceDemoMode: boolean
+  ObjectStorageProvider: string
+  ObjectStorageRegion: string
+  ObjectStorageBucket: string
+  ObjectStorageScheme: string
+  ObjectStorageSecretId: string
+  ObjectStoragePublicBaseURL: string
+  ObjectStorageMaxMB: number
   'performance_setting.disk_cache_enabled': boolean
   'performance_setting.disk_cache_threshold_mb': number
   'performance_setting.disk_cache_max_size_mb': number
@@ -477,5 +490,24 @@ export type UpstreamRatiosResponse = {
     differences: DifferencesMap
     prices: PricingSyncModels
     test_results: TestResult[]
+  }
+}
+
+export type DifyConnectionTestRequest = {
+  /** Unsaved form values; blank fields keep the saved option value. */
+  base_url?: string
+  email?: string
+  password?: string
+}
+
+export type DifyConnectionTestResponse = {
+  success: boolean
+  message: string
+  code?: string
+  data?: {
+    total: number
+    email: string
+    /** False when the configured console address is not the Dify console. */
+    console_url_ok?: boolean
   }
 }

@@ -17,6 +17,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { SystemBehaviorSection } from '../general/system-behavior-section'
+import { DifySettingsSection } from '../integrations/dify-settings-section'
+import { ObjectStorageSettingsSection } from '../integrations/object-storage-settings-section'
+import { TrainingServiceSettingsSection } from '../integrations/training-service-settings-section'
 import { EmailSettingsSection } from '../integrations/email-settings-section'
 import { MonitoringSettingsSection } from '../integrations/monitoring-settings-section'
 import { WorkerSettingsSection } from '../integrations/worker-settings-section'
@@ -123,6 +126,56 @@ const OPERATIONS_SECTIONS = [
             settings['performance_setting.monitor_memory_threshold'] ?? 90,
           'performance_setting.monitor_disk_threshold':
             settings['performance_setting.monitor_disk_threshold'] ?? 95,
+        }}
+      />
+    ),
+  },
+  {
+    id: 'dify',
+    titleKey: 'Dify Agent Service',
+    build: (settings: OperationsSettings) => (
+      <DifySettingsSection
+        defaultValues={{
+          DifyAPIBaseURL: settings.DifyAPIBaseURL ?? '',
+          DifyConsoleURL: settings.DifyConsoleURL ?? '',
+          DifyAccountEmail: settings.DifyAccountEmail ?? '',
+          DifyAccountSecret: '',
+        }}
+      />
+    ),
+  },
+  {
+    id: 'training-service',
+    titleKey: 'Model Training Service',
+    build: (settings: OperationsSettings) => (
+      <TrainingServiceSettingsSection
+        defaultValues={{
+          TrainingServiceURL: settings.TrainingServiceURL ?? '',
+          TrainingServiceLLMBaseURL:
+            settings.TrainingServiceLLMBaseURL ?? '',
+          TrainingServiceTimeoutSeconds:
+            settings.TrainingServiceTimeoutSeconds ?? 60,
+          TrainingServiceTokenTTLHours:
+            settings.TrainingServiceTokenTTLHours ?? 168,
+          TrainingServiceDemoMode: settings.TrainingServiceDemoMode ?? false,
+        }}
+      />
+    ),
+  },
+  {
+    id: 'object-storage',
+    titleKey: 'Object Storage',
+    build: (settings: OperationsSettings) => (
+      <ObjectStorageSettingsSection
+        defaultValues={{
+          ObjectStorageProvider: settings.ObjectStorageProvider ?? 'tencent',
+          ObjectStorageRegion: settings.ObjectStorageRegion ?? 'ap-nanjing',
+          ObjectStorageBucket: settings.ObjectStorageBucket ?? '',
+          ObjectStorageScheme: settings.ObjectStorageScheme ?? 'https',
+          ObjectStorageSecretId: settings.ObjectStorageSecretId ?? '',
+          ObjectStoragePublicBaseURL:
+            settings.ObjectStoragePublicBaseURL ?? '',
+          ObjectStorageMaxMB: settings.ObjectStorageMaxMB ?? 10,
         }}
       />
     ),

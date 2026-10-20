@@ -20,6 +20,8 @@ import { api } from '@/lib/api'
 
 import type {
   ConfirmPaymentComplianceResponse,
+  DifyConnectionTestRequest,
+  DifyConnectionTestResponse,
   FetchUpstreamRatiosRequest,
   LogCleanupTask,
   SystemOptionsResponse,
@@ -121,6 +123,17 @@ export async function getUpstreamChannels() {
 export async function fetchUpstreamRatios(request: FetchUpstreamRatiosRequest) {
   const res = await api.post<UpstreamRatiosResponse>(
     '/api/ratio_sync/fetch',
+    request
+  )
+  return res.data
+}
+
+/** Verifies the configured Dify account can list the workspace agents. */
+export async function testDifyConnection(
+  request: DifyConnectionTestRequest = {}
+) {
+  const res = await api.post<DifyConnectionTestResponse>(
+    '/api/agent-workshop/admin/dify/test',
     request
   )
   return res.data
